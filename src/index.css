@@ -98,15 +98,15 @@
   }
 
   .glow-orange {
-    box-shadow: 0 0 20px hsl(var(--brand-orange) / 0.3), 0 0 60px hsl(var(--brand-orange) / 0.1);
+    box-shadow: 0 0 12px hsl(var(--brand-orange) / 0.15), 0 0 30px hsl(var(--brand-orange) / 0.06);
   }
 
   .glow-blue {
-    box-shadow: 0 0 20px hsl(var(--brand-blue) / 0.3), 0 0 60px hsl(var(--brand-blue) / 0.1);
+    box-shadow: 0 0 12px hsl(var(--brand-blue) / 0.15), 0 0 30px hsl(var(--brand-blue) / 0.06);
   }
 
   .glow-green {
-    box-shadow: 0 0 20px hsl(var(--brand-green) / 0.3), 0 0 60px hsl(var(--brand-green) / 0.1);
+    box-shadow: 0 0 12px hsl(var(--brand-green) / 0.15), 0 0 30px hsl(var(--brand-green) / 0.06);
   }
 
   .text-gradient-brand {
