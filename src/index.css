@@ -159,8 +159,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px hsl(var(--brand-orange) / 0.3); }
-  50% { box-shadow: 0 0 40px hsl(var(--brand-orange) / 0.6), 0 0 80px hsl(var(--brand-orange) / 0.2); }
+  0%, 100% { box-shadow: 0 0 10px hsl(var(--brand-orange) / 0.15); }
+  50% { box-shadow: 0 0 20px hsl(var(--brand-orange) / 0.3), 0 0 40px hsl(var(--brand-orange) / 0.1); }
 }
 
 @keyframes float {
