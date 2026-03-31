@@ -121,7 +121,7 @@
   }
   .btn-premium:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 40px hsl(var(--brand-orange) / 0.4), 0 0 80px hsl(var(--brand-orange) / 0.15);
+    box-shadow: 0 8px 24px hsl(var(--brand-orange) / 0.2), 0 0 40px hsl(var(--brand-orange) / 0.08);
   }
 
   .card-premium {
