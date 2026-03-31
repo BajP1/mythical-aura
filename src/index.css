@@ -98,15 +98,15 @@
   }
 
   .glow-orange {
-    box-shadow: 0 0 20px hsl(var(--brand-orange) / 0.3), 0 0 60px hsl(var(--brand-orange) / 0.1);
+    box-shadow: 0 0 12px hsl(var(--brand-orange) / 0.15), 0 0 30px hsl(var(--brand-orange) / 0.06);
   }
 
   .glow-blue {
-    box-shadow: 0 0 20px hsl(var(--brand-blue) / 0.3), 0 0 60px hsl(var(--brand-blue) / 0.1);
+    box-shadow: 0 0 12px hsl(var(--brand-blue) / 0.15), 0 0 30px hsl(var(--brand-blue) / 0.06);
   }
 
   .glow-green {
-    box-shadow: 0 0 20px hsl(var(--brand-green) / 0.3), 0 0 60px hsl(var(--brand-green) / 0.1);
+    box-shadow: 0 0 12px hsl(var(--brand-green) / 0.15), 0 0 30px hsl(var(--brand-green) / 0.06);
   }
 
   .text-gradient-brand {
@@ -121,7 +121,7 @@
   }
   .btn-premium:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 40px hsl(var(--brand-orange) / 0.4), 0 0 80px hsl(var(--brand-orange) / 0.15);
+    box-shadow: 0 8px 24px hsl(var(--brand-orange) / 0.2), 0 0 40px hsl(var(--brand-orange) / 0.08);
   }
 
   .card-premium {
@@ -129,8 +129,8 @@
   }
   .card-premium:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 60px hsl(var(--brand-orange) / 0.15), 0 0 40px hsl(var(--brand-blue) / 0.1);
-    border-color: hsl(var(--brand-orange) / 0.3);
+    box-shadow: 0 12px 36px hsl(var(--brand-orange) / 0.08), 0 0 20px hsl(var(--brand-blue) / 0.05);
+    border-color: hsl(var(--brand-orange) / 0.2);
   }
 
   .section-padding {
@@ -159,8 +159,8 @@
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px hsl(var(--brand-orange) / 0.3); }
-  50% { box-shadow: 0 0 40px hsl(var(--brand-orange) / 0.6), 0 0 80px hsl(var(--brand-orange) / 0.2); }
+  0%, 100% { box-shadow: 0 0 10px hsl(var(--brand-orange) / 0.15); }
+  50% { box-shadow: 0 0 20px hsl(var(--brand-orange) / 0.3), 0 0 40px hsl(var(--brand-orange) / 0.1); }
 }
 
 @keyframes float {
