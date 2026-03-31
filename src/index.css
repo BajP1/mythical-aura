@@ -129,8 +129,8 @@
   }
   .card-premium:hover {
     transform: translateY(-8px);
-    box-shadow: 0 20px 60px hsl(var(--brand-orange) / 0.15), 0 0 40px hsl(var(--brand-blue) / 0.1);
-    border-color: hsl(var(--brand-orange) / 0.3);
+    box-shadow: 0 12px 36px hsl(var(--brand-orange) / 0.08), 0 0 20px hsl(var(--brand-blue) / 0.05);
+    border-color: hsl(var(--brand-orange) / 0.2);
   }
 
   .section-padding {
