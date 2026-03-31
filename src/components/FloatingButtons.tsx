@@ -23,7 +23,7 @@ const FloatingButtons = () => (
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.95 }}
       className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg animate-pulse-glow"
-      style={{ background: "linear-gradient(135deg, hsl(33,100%,50%), hsl(0,100%,62%))" }}
+      style={{ background: "linear-gradient(135deg, #25D366, #128C7E)" }}
       aria-label="Call Us"
     >
       <Phone size={26} className="text-foreground" />
