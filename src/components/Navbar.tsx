@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Instagram, Facebook, Youtube } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { InstagramIcon, FacebookIcon, YouTubeIcon } from "@/components/SocialIcons";
 import logo from "@/assets/logo.jpeg";
 
 const navLinks = [
@@ -51,15 +52,9 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="flex items-center gap-3 ml-4">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-orange transition-colors">
-              <Instagram size={18} />
-            </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-blue transition-colors">
-              <Facebook size={18} />
-            </a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-red transition-colors">
-              <Youtube size={18} />
-            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={20} /></a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={20} /></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={20} /></a>
           </div>
         </div>
 
@@ -94,9 +89,9 @@ const Navbar = () => {
                 </Link>
               ))}
               <div className="flex gap-6 mt-4">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-orange transition-colors"><Instagram size={22} /></a>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-blue transition-colors"><Facebook size={22} /></a>
-                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-red transition-colors"><Youtube size={22} /></a>
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={24} /></a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={24} /></a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={24} /></a>
               </div>
             </div>
           </motion.div>

@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
-import { Instagram, Facebook, Youtube, MapPin, Phone } from "lucide-react";
+import { MapPin, Phone } from "lucide-react";
+import { InstagramIcon, FacebookIcon, YouTubeIcon } from "@/components/SocialIcons";
 import logo from "@/assets/logo.jpeg";
 
 const Footer = () => (
@@ -33,9 +34,9 @@ const Footer = () => (
             <a href="tel:+918264004475" className="hover:text-brand-orange transition-colors">+91 8264004475</a>
           </div>
           <div className="flex gap-4 mt-2">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-orange transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(33,100%,50%,0.5)]"><Instagram size={20} /></a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-blue transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(199,100%,50%,0.5)]"><Facebook size={20} /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-brand-red transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(0,100%,62%,0.5)]"><Youtube size={20} /></a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={22} /></a>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={22} /></a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={22} /></a>
           </div>
         </div>
       </div>
