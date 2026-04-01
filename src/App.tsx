@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
@@ -49,13 +50,15 @@ const App = () => (
     <TooltipProvider>
       <Sonner />
       <BrowserRouter>
-        <ScrollToTop />
-        <Navbar />
-        <main className="min-h-screen">
-          <AnimatedRoutes />
-        </main>
-        <Footer />
-        <FloatingButtons />
+        <AuthProvider>
+          <ScrollToTop />
+          <Navbar />
+          <main className="min-h-screen">
+            <AnimatedRoutes />
+          </main>
+          <Footer />
+          <FloatingButtons />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
