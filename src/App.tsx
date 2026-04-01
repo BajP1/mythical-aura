@@ -10,6 +10,7 @@ import FloatingButtons from "@/components/FloatingButtons";
 import Index from "./pages/Index";
 import About from "./pages/About";
 import BookNow from "./pages/BookNow";
+import AdminDashboard from "./pages/AdminDashboard";
 import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
