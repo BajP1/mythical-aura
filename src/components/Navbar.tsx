@@ -56,9 +56,9 @@ const Navbar = () => {
             </Link>
           ))}
           <div className="flex items-center gap-3 ml-4">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={20} /></a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={20} /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={20} /></a>
+            <a href="https://www.instagram.com/mythicalgamingstation?igsh=eXBmcWRwY3E5Z2Np" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={20} /></a>
+            <a href="https://www.facebook.com/share/18eB2vnZ6s/" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={20} /></a>
+            <a href="https://youtube.com/@mythicalgamingstation?feature=shared" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={20} /></a>
           </div>
 
           {/* Auth */}
