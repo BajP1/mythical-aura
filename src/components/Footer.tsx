@@ -34,9 +34,9 @@ const Footer = () => (
             <a href="tel:+918264004475" className="hover:text-brand-orange transition-colors">+91 8264004475</a>
           </div>
           <div className="flex gap-4 mt-2">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={22} /></a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={22} /></a>
-            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={22} /></a>
+            <a href="https://www.instagram.com/mythicalgamingstation?igsh=eXBmcWRwY3E5Z2Np" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><InstagramIcon size={22} /></a>
+            <a href="https://www.facebook.com/share/18eB2vnZ6s/" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><FacebookIcon size={22} /></a>
+            <a href="https://youtube.com/@mythicalgamingstation?feature=shared" target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><YouTubeIcon size={22} /></a>
           </div>
         </div>
       </div>
