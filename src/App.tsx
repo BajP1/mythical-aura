@@ -49,10 +49,10 @@ const AnimatedRoutes = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
+    <AuthProvider>
+      <TooltipProvider>
+        <Sonner />
+        <BrowserRouter>
           <ScrollToTop />
           <Navbar />
           <main className="min-h-screen">
@@ -60,9 +60,9 @@ const App = () => (
           </main>
           <Footer />
           <FloatingButtons />
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
