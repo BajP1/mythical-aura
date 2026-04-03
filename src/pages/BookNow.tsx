@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Home, Gamepad2, Calendar as CalendarIcon, Clock, Timer, CreditCard, ChevronLeft, ChevronRight, Check, LogIn } from "lucide-react";
+import { Users, Home, Gamepad2, Calendar as CalendarIcon, Clock, Timer, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -13,6 +13,7 @@ const STEPS = [
   { icon: CalendarIcon, label: "Date" },
   { icon: Clock, label: "Time" },
   { icon: Timer, label: "Duration" },
+  { icon: Phone, label: "Phone" },
   { icon: CreditCard, label: "Summary" },
 ];
 
@@ -28,6 +29,7 @@ const BookNow = () => {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [duration, setDuration] = useState(1);
+  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
@@ -45,6 +47,7 @@ const BookNow = () => {
     if (step === 3) return date !== "";
     if (step === 4) return time !== "";
     if (step === 5) return duration >= 1;
+    if (step === 6) return phone.trim().length >= 10;
     return true;
   };
 
@@ -62,6 +65,7 @@ const BookNow = () => {
         date,
         time,
         duration,
+        phone,
         total_price: price,
       }).select("id").single();
 
@@ -125,6 +129,7 @@ const BookNow = () => {
                   ["Date", date],
                   ["Time", time],
                   ["Duration", `${duration}h`],
+                  ["Phone", phone],
                   ["Total", `₹${price}`],
                 ].map(([l, v]) => (
                   <div key={l} className="flex justify-between border-b border-border/30 pb-2 last:border-0">
@@ -242,6 +247,15 @@ const BookNow = () => {
       case 6:
         return (
           <div>
+            <h3 className="heading-md mb-2">Phone Number</h3>
+            <p className="text-muted-foreground mb-8">Enter your phone number for booking confirmation</p>
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 9876543210"
+              className="w-full max-w-sm mx-auto block glass rounded-xl px-6 py-4 text-primary font-display text-lg bg-transparent border border-border focus:border-brand-orange focus:outline-none transition-colors" />
+          </div>
+        );
+      case 7:
+        return (
+          <div>
             <h3 className="heading-md mb-8 text-center">Booking Summary</h3>
             <div className="card-premium max-w-md mx-auto">
               <div className="space-y-4">
@@ -252,6 +266,7 @@ const BookNow = () => {
                   ["Date", date || "—"],
                   ["Time", time || "—"],
                   ["Duration", `${duration} ${duration === 1 ? "Hour" : "Hours"}`],
+                  ["Phone", phone || "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between items-center py-2 border-b border-border/30 last:border-0">
                     <span className="text-muted-foreground text-sm">{label}</span>
@@ -316,7 +331,7 @@ const BookNow = () => {
           </AnimatePresence>
 
           {/* Nav */}
-          {step < 6 && (
+          {step < 7 && (
             <div className="flex justify-between mt-12">
               <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
                 className="glass rounded-xl px-6 py-3 font-display text-sm tracking-wider text-muted-foreground hover:text-primary disabled:opacity-30 transition-all flex items-center gap-2">

@@ -17,6 +17,7 @@ interface Booking {
   date: string;
   time: string;
   duration: number;
+  phone: string;
   total_price: number;
   created_at: string;
 }
@@ -86,7 +87,7 @@ const AdminDashboard = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border/50">
-                    {["Entry #", "Name", "Email", "Players", "Cabin", "Games", "Date", "Time", "Duration", "Total"].map((h) => (
+                    {["Entry #", "Name", "Email", "Players", "Cabin", "Games", "Date", "Time", "Duration", "Phone", "Total"].map((h) => (
                       <th key={h} className="py-3 px-3 font-display text-xs tracking-widest uppercase text-muted-foreground">{h}</th>
                     ))}
                   </tr>
@@ -109,6 +110,7 @@ const AdminDashboard = () => {
                       <td className="py-3 px-3 text-sm text-primary">{b.date}</td>
                       <td className="py-3 px-3 text-sm text-primary">{b.time}</td>
                       <td className="py-3 px-3 text-sm text-primary text-center">{b.duration}h</td>
+                      <td className="py-3 px-3 text-sm text-primary">{b.phone || "—"}</td>
                       <td className="py-3 px-3 font-display text-sm font-bold text-brand-orange">₹{b.total_price}</td>
                     </motion.tr>
                   ))}
@@ -140,6 +142,7 @@ const AdminDashboard = () => {
                       ["Date", b.date],
                       ["Time", b.time],
                       ["Duration", `${b.duration}h`],
+                      ["Phone", b.phone || "—"],
                     ].map(([l, v]) => (
                       <div key={l} className="flex justify-between border-b border-border/20 pb-1">
                         <span className="text-muted-foreground text-xs">{l}</span>
