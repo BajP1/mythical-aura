@@ -129,6 +129,7 @@ const BookNow = () => {
                   ["Date", date],
                   ["Time", time],
                   ["Duration", `${duration}h`],
+                  ["Phone", phone],
                   ["Total", `₹${price}`],
                 ].map(([l, v]) => (
                   <div key={l} className="flex justify-between border-b border-border/30 pb-2 last:border-0">
