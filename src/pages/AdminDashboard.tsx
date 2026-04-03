@@ -87,7 +87,7 @@ const AdminDashboard = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border/50">
-                    {["Entry #", "Name", "Email", "Players", "Cabin", "Games", "Date", "Time", "Duration", "Total"].map((h) => (
+                    {["Entry #", "Name", "Email", "Players", "Cabin", "Games", "Date", "Time", "Duration", "Phone", "Total"].map((h) => (
                       <th key={h} className="py-3 px-3 font-display text-xs tracking-widest uppercase text-muted-foreground">{h}</th>
                     ))}
                   </tr>
