@@ -47,6 +47,7 @@ const BookNow = () => {
     if (step === 3) return date !== "";
     if (step === 4) return time !== "";
     if (step === 5) return duration >= 1;
+    if (step === 6) return phone.trim().length >= 10;
     return true;
   };
 
