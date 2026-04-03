@@ -13,6 +13,7 @@ const STEPS = [
   { icon: CalendarIcon, label: "Date" },
   { icon: Clock, label: "Time" },
   { icon: Timer, label: "Duration" },
+  { icon: Users, label: "Phone" },
   { icon: CreditCard, label: "Summary" },
 ];
 
