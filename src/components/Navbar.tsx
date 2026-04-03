@@ -6,6 +6,8 @@ import { InstagramIcon, FacebookIcon, YouTubeIcon } from "@/components/SocialIco
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.jpeg";
 
+const ADMIN_EMAIL = "mythicalgamingstation@gmail.com";
+
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
