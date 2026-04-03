@@ -6,6 +6,8 @@ import { InstagramIcon, FacebookIcon, YouTubeIcon } from "@/components/SocialIco
 import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.jpeg";
 
+const ADMIN_EMAIL = "mythicalgamingstation@gmail.com";
+
 const navLinks = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
@@ -18,6 +20,8 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  const allLinks = isAdmin ? [...navLinks, { to: "/admin", label: "Admin" }] : navLinks;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
@@ -42,7 +46,7 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((l) => (
+          {allLinks.map((l) => (
             <Link
               key={l.to}
               to={l.to}
@@ -101,7 +105,7 @@ const Navbar = () => {
             className="md:hidden glass-navbar overflow-hidden"
           >
             <div className="flex flex-col items-center gap-6 py-8">
-              {navLinks.map((l) => (
+              {allLinks.map((l) => (
                 <Link
                   key={l.to}
                   to={l.to}
