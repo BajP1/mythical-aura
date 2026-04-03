@@ -110,6 +110,7 @@ const AdminDashboard = () => {
                       <td className="py-3 px-3 text-sm text-primary">{b.date}</td>
                       <td className="py-3 px-3 text-sm text-primary">{b.time}</td>
                       <td className="py-3 px-3 text-sm text-primary text-center">{b.duration}h</td>
+                      <td className="py-3 px-3 text-sm text-primary">{b.phone || "—"}</td>
                       <td className="py-3 px-3 font-display text-sm font-bold text-brand-orange">₹{b.total_price}</td>
                     </motion.tr>
                   ))}
