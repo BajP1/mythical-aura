@@ -20,6 +20,8 @@ const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
   const { user, loading, signInWithGoogle, signOut } = useAuth();
+  const isAdmin = user?.email === ADMIN_EMAIL;
+  const allLinks = isAdmin ? [...navLinks, { to: "/admin", label: "Admin" }] : navLinks;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 50);
