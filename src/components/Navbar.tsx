@@ -103,7 +103,7 @@ const Navbar = () => {
             className="md:hidden glass-navbar overflow-hidden"
           >
             <div className="flex flex-col items-center gap-6 py-8">
-              {navLinks.map((l) => (
+              {allLinks.map((l) => (
                 <Link
                   key={l.to}
                   to={l.to}
