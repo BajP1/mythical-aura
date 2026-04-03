@@ -35,7 +35,9 @@ const AdminDashboard = () => {
         .from("bookings")
         .select("*")
         .order("created_at", { ascending: false });
+      console.log("Admin bookings response:", { data, error });
       if (!error && data) setBookings(data as Booking[]);
+      else if (error) console.error("Bookings fetch error:", error);
       setLoading(false);
     };
     fetchBookings();
