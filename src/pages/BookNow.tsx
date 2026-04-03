@@ -65,6 +65,7 @@ const BookNow = () => {
         date,
         time,
         duration,
+        phone,
         total_price: price,
       }).select("id").single();
 
