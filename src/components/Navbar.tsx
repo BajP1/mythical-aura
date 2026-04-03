@@ -44,7 +44,7 @@ const Navbar = () => {
 
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-8">
-          {navLinks.map((l) => (
+          {allLinks.map((l) => (
             <Link
               key={l.to}
               to={l.to}
