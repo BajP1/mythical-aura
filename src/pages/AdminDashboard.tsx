@@ -142,6 +142,7 @@ const AdminDashboard = () => {
                       ["Date", b.date],
                       ["Time", b.time],
                       ["Duration", `${b.duration}h`],
+                      ["Phone", b.phone || "—"],
                     ].map(([l, v]) => (
                       <div key={l} className="flex justify-between border-b border-border/20 pb-1">
                         <span className="text-muted-foreground text-xs">{l}</span>

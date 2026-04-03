@@ -331,7 +331,7 @@ const BookNow = () => {
           </AnimatePresence>
 
           {/* Nav */}
-          {step < 6 && (
+          {step < 7 && (
             <div className="flex justify-between mt-12">
               <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
                 className="glass rounded-xl px-6 py-3 font-display text-sm tracking-wider text-muted-foreground hover:text-primary disabled:opacity-30 transition-all flex items-center gap-2">
