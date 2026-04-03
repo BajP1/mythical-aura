@@ -247,6 +247,15 @@ const BookNow = () => {
       case 6:
         return (
           <div>
+            <h3 className="heading-md mb-2">Phone Number</h3>
+            <p className="text-muted-foreground mb-8">Enter your phone number for booking confirmation</p>
+            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 9876543210"
+              className="w-full max-w-sm mx-auto block glass rounded-xl px-6 py-4 text-primary font-display text-lg bg-transparent border border-border focus:border-brand-orange focus:outline-none transition-colors" />
+          </div>
+        );
+      case 7:
+        return (
+          <div>
             <h3 className="heading-md mb-8 text-center">Booking Summary</h3>
             <div className="card-premium max-w-md mx-auto">
               <div className="space-y-4">
@@ -257,6 +266,7 @@ const BookNow = () => {
                   ["Date", date || "—"],
                   ["Time", time || "—"],
                   ["Duration", `${duration} ${duration === 1 ? "Hour" : "Hours"}`],
+                  ["Phone", phone || "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between items-center py-2 border-b border-border/30 last:border-0">
                     <span className="text-muted-foreground text-sm">{label}</span>
