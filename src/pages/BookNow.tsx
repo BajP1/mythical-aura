@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Home, Gamepad2, Calendar as CalendarIcon, Clock, Timer, CreditCard, ChevronLeft, ChevronRight, Check, LogIn } from "lucide-react";
+import { Users, Home, Gamepad2, Calendar as CalendarIcon, Clock, Timer, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
