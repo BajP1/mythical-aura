@@ -17,6 +17,7 @@ interface Booking {
   date: string;
   time: string;
   duration: number;
+  phone: string;
   total_price: number;
   created_at: string;
 }
