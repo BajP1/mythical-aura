@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldX, Loader2, Users, Home, Gamepad2, CalendarIcon, Clock, Timer, CreditCard } from "lucide-react";
+import { ShieldX, Loader2 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -87,7 +87,7 @@ const AdminDashboard = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border/50">
-                    {["Entry #", "Name", "Email", "Players", "Cabin", "Games", "Date", "Time", "Duration", "Phone", "Total"].map((h) => (
+                    {["Entry #", "Name", "Email", "Players", "Section", "Games", "Date", "Time", "Duration", "Phone", "Total"].map((h) => (
                       <th key={h} className="py-3 px-3 font-display text-xs tracking-widest uppercase text-muted-foreground">{h}</th>
                     ))}
                   </tr>
@@ -105,11 +105,11 @@ const AdminDashboard = () => {
                       <td className="py-3 px-3 text-sm text-primary">{b.name}</td>
                       <td className="py-3 px-3 text-sm text-muted-foreground">{b.email}</td>
                       <td className="py-3 px-3 text-sm text-primary text-center">{b.players}</td>
-                      <td className="py-3 px-3 text-sm text-primary text-center">#{String(b.cabin).padStart(2, "0")}</td>
+                      <td className="py-3 px-3 text-sm text-primary text-center">Section {String(b.cabin).padStart(2, "0")}</td>
                       <td className="py-3 px-3 text-xs text-muted-foreground max-w-[160px] truncate">{Array.isArray(b.games) ? b.games.join(", ") : b.games}</td>
                       <td className="py-3 px-3 text-sm text-primary">{b.date}</td>
                       <td className="py-3 px-3 text-sm text-primary">{b.time}</td>
-                      <td className="py-3 px-3 text-sm text-primary text-center">{b.duration}h</td>
+                      <td className="py-3 px-3 text-sm text-primary text-center">{b.duration} min</td>
                       <td className="py-3 px-3 text-sm text-primary">{b.phone || "—"}</td>
                       <td className="py-3 px-3 font-display text-sm font-bold text-brand-orange">₹{b.total_price}</td>
                     </motion.tr>
@@ -137,11 +137,11 @@ const AdminDashboard = () => {
                       ["Name", b.name],
                       ["Email", b.email],
                       ["Players", String(b.players)],
-                      ["Cabin", `#${String(b.cabin).padStart(2, "0")}`],
+                      ["Section", `Section ${String(b.cabin).padStart(2, "0")}`],
                       ["Games", Array.isArray(b.games) ? b.games.join(", ") : b.games],
                       ["Date", b.date],
                       ["Time", b.time],
-                      ["Duration", `${b.duration}h`],
+                      ["Duration", `${b.duration} min`],
                       ["Phone", b.phone || "—"],
                     ].map(([l, v]) => (
                       <div key={l} className="flex justify-between border-b border-border/20 pb-1">
