@@ -12,7 +12,7 @@ import gallery3 from "@/assets/gallery3.jpg";
 
 const features = [
   { icon: Gamepad2, title: "High-End Gaming Setup", desc: "PS5 consoles with 4K displays and premium audio systems for an immersive experience." },
-  { icon: Shield, title: "Private Cabins", desc: "Exclusive private gaming cabins with ambient lighting." },
+  { icon: Shield, title: "Private Sections", desc: "Exclusive private gaming sections with ambient lighting." },
   { icon: Users, title: "Multiplayer Experience", desc: "Connect with friends in our dedicated multiplayer zones for epic gaming sessions." },
   { icon: Sofa, title: "Comfortable Lounge", desc: "Premium ergonomic chairs and a relaxing atmosphere to game for hours." },
 ];
