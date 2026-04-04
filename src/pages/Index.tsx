@@ -18,7 +18,7 @@ const features = [
 ];
 
 const testimonials = [
-  { name: "Arjun S.", text: "Best gaming lounge in Patiala! The PS5 setup is incredible and the private cabins are so comfortable.", rating: 5 },
+  { name: "Arjun S.", text: "Best gaming lounge in Patiala! The PS5 setup is incredible and the private sections are so comfortable.", rating: 5 },
   { name: "Priya M.", text: "Took my friends here for a birthday party. The multiplayer experience was absolutely amazing!", rating: 5 },
   { name: "Rahul K.", text: "Premium quality at affordable prices. The ambiance with neon lighting is next level.", rating: 5 },
   { name: "Simran D.", text: "Clean, well-maintained, and the staff is super friendly. We keep coming back every weekend!", rating: 5 },
