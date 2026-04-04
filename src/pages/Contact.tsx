@@ -9,7 +9,13 @@ const Contact = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent! We'll get back to you soon.");
+    if (!form.name.trim() || !form.phone.trim() || !form.message.trim()) {
+      toast.error("Please fill in all fields before sending.");
+      return;
+    }
+    const text = `Name: ${form.name}%0APhone: ${form.phone}%0AMessage: ${form.message}`;
+    window.open(`https://wa.me/918264004475?text=${encodeURIComponent(`Name: ${form.name}\nPhone: ${form.phone}\nMessage: ${form.message}`)}`, "_blank");
+    toast.success("Redirecting to WhatsApp...");
     setForm({ name: "", phone: "", message: "" });
   };
 
