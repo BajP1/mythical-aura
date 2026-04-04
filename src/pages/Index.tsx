@@ -121,7 +121,7 @@ const Index = () => {
               <p className="font-display text-xl md:text-2xl font-bold text-brand-orange tracking-wider">
                 🔥 Limited Slots Available Today
               </p>
-              <p className="text-muted-foreground mt-2 text-sm">Book now before all cabins are taken!</p>
+              <p className="text-muted-foreground mt-2 text-sm">Book now before all sections are taken!</p>
             </motion.div>
           </div>
         </ScrollReveal>
