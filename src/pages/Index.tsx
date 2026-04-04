@@ -12,13 +12,13 @@ import gallery3 from "@/assets/gallery3.jpg";
 
 const features = [
   { icon: Gamepad2, title: "High-End Gaming Setup", desc: "PS5 consoles with 4K displays and premium audio systems for an immersive experience." },
-  { icon: Shield, title: "Private Cabins", desc: "Exclusive private gaming cabins with ambient lighting." },
+  { icon: Shield, title: "Private Sections", desc: "Exclusive private gaming sections with ambient lighting." },
   { icon: Users, title: "Multiplayer Experience", desc: "Connect with friends in our dedicated multiplayer zones for epic gaming sessions." },
   { icon: Sofa, title: "Comfortable Lounge", desc: "Premium ergonomic chairs and a relaxing atmosphere to game for hours." },
 ];
 
 const testimonials = [
-  { name: "Arjun S.", text: "Best gaming lounge in Patiala! The PS5 setup is incredible and the private cabins are so comfortable.", rating: 5 },
+  { name: "Arjun S.", text: "Best gaming lounge in Patiala! The PS5 setup is incredible and the private sections are so comfortable.", rating: 5 },
   { name: "Priya M.", text: "Took my friends here for a birthday party. The multiplayer experience was absolutely amazing!", rating: 5 },
   { name: "Rahul K.", text: "Premium quality at affordable prices. The ambiance with neon lighting is next level.", rating: 5 },
   { name: "Simran D.", text: "Clean, well-maintained, and the staff is super friendly. We keep coming back every weekend!", rating: 5 },
@@ -121,7 +121,7 @@ const Index = () => {
               <p className="font-display text-xl md:text-2xl font-bold text-brand-orange tracking-wider">
                 🔥 Limited Slots Available Today
               </p>
-              <p className="text-muted-foreground mt-2 text-sm">Book now before all cabins are taken!</p>
+              <p className="text-muted-foreground mt-2 text-sm">Book now before all sections are taken!</p>
             </motion.div>
           </div>
         </ScrollReveal>
