@@ -108,32 +108,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Cabins */}
-      <section className="section-padding bg-secondary/30">
-        <div className="container mx-auto">
-          <ScrollReveal>
-            <h2 className="heading-lg text-center mb-4">Our Gaming Cabins</h2>
-            <p className="subtitle text-center mb-16 max-w-2xl mx-auto">10 premium private cabins equipped with the latest PS5 consoles</p>
-          </ScrollReveal>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-            {Array.from({ length: 10 }, (_, i) => (
-              <ScrollReveal key={i} delay={i * 0.05}>
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  className="card-premium relative overflow-hidden aspect-square cursor-pointer group"
-                >
-                  <img src={cabinImg} alt={`Cabin ${i + 1}`} loading="lazy" className="absolute inset-0 w-full h-full object-cover rounded-xl opacity-60 group-hover:opacity-80 transition-opacity duration-500" width={800} height={800} />
-                  <div className="relative z-10 flex flex-col items-center justify-center h-full">
-                    <span className="font-display text-3xl font-bold text-primary">{String(i + 1).padStart(2, "0")}</span>
-                    <span className="text-xs text-muted-foreground mt-1 font-display tracking-wider">CABIN</span>
-                  </div>
-                </motion.div>
-              </ScrollReveal>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* Urgency */}
       <section className="py-16">
