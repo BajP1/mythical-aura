@@ -9,7 +9,9 @@ import cabinImg from "@/assets/cabin.jpg";
 import gallery1 from "@/assets/gallery1.jpg";
 import gallery2 from "@/assets/gallery2.jpg";
 import gallery3 from "@/assets/gallery3.jpg";
-
+import gallery4 from "@/assets/gallery4.jpg";
+import gallery5 from "@/assets/gallery5.jpg";
+import gallery6 from "@/assets/gallery6.jpg";
 const features = [
   { icon: Gamepad2, title: "High-End Gaming Setup", desc: "PS5 consoles with 4K displays and premium audio systems for an immersive experience." },
   { icon: Shield, title: "Private Sections", desc: "Exclusive private gaming sections with ambient lighting." },
@@ -24,7 +26,7 @@ const testimonials = [
   { name: "Simran D.", text: "Clean, well-maintained, and the staff is super friendly. We keep coming back every weekend!", rating: 5 },
 ];
 
-const galleryImages = [heroBg, gallery1, gallery2, gallery3, cabinImg, gallery1];
+const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6];
 
 const Index = () => {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
@@ -142,7 +144,7 @@ const Index = () => {
                   onClick={() => setLightbox(i)}
                   className="aspect-video rounded-2xl overflow-hidden cursor-pointer relative group"
                 >
-                  <img src={img} alt={`Gallery ${i + 1}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" width={800} height={800} />
+                  <img src={img} alt={`Gallery ${i + 1}`} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" width={3840} height={2160} />
                   <div className="absolute inset-0 bg-background/0 group-hover:bg-background/30 transition-colors duration-300" />
                 </motion.div>
               </ScrollReveal>
