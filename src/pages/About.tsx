@@ -1,8 +1,7 @@
 import { Gamepad2, Shield, DollarSign, Tv, Headphones, Zap } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 import heroBg from "@/assets/hero-bg.jpg";
-import cabinImg from "@/assets/cabin.jpg";
-import gallery3 from "@/assets/gallery3.jpg";
+import aboutLounge from "@/assets/about-lounge.jpg";
 
 const whyUs = [
   { icon: Gamepad2, title: "Premium PS5 Consoles", desc: "Latest PlayStation 5 with DualSense controllers for the ultimate gaming experience." },
