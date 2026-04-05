@@ -9,7 +9,9 @@ import cabinImg from "@/assets/cabin.jpg";
 import gallery1 from "@/assets/gallery1.jpg";
 import gallery2 from "@/assets/gallery2.jpg";
 import gallery3 from "@/assets/gallery3.jpg";
-
+import gallery4 from "@/assets/gallery4.jpg";
+import gallery5 from "@/assets/gallery5.jpg";
+import gallery6 from "@/assets/gallery6.jpg";
 const features = [
   { icon: Gamepad2, title: "High-End Gaming Setup", desc: "PS5 consoles with 4K displays and premium audio systems for an immersive experience." },
   { icon: Shield, title: "Private Sections", desc: "Exclusive private gaming sections with ambient lighting." },
