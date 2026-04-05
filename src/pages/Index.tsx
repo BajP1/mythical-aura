@@ -26,7 +26,7 @@ const testimonials = [
   { name: "Simran D.", text: "Clean, well-maintained, and the staff is super friendly. We keep coming back every weekend!", rating: 5 },
 ];
 
-const galleryImages = [heroBg, gallery1, gallery2, gallery3, cabinImg, gallery1];
+const galleryImages = [gallery1, gallery2, gallery3, gallery4, gallery5, gallery6];
 
 const Index = () => {
   const [testimonialIdx, setTestimonialIdx] = useState(0);
