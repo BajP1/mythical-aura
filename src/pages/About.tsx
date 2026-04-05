@@ -1,8 +1,7 @@
 import { Gamepad2, Shield, DollarSign, Tv, Headphones, Zap } from "lucide-react";
 import ScrollReveal from "@/components/ScrollReveal";
 import heroBg from "@/assets/hero-bg.jpg";
-import cabinImg from "@/assets/cabin.jpg";
-import gallery3 from "@/assets/gallery3.jpg";
+import aboutLounge from "@/assets/about-lounge.jpg";
 
 const whyUs = [
   { icon: Gamepad2, title: "Premium PS5 Consoles", desc: "Latest PlayStation 5 with DualSense controllers for the ultimate gaming experience." },
@@ -47,7 +46,7 @@ const About = () => (
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <div className="rounded-2xl overflow-hidden glow-blue">
-              <img src={cabinImg} alt="Gaming cabin" loading="lazy" className="w-full h-80 object-cover" width={800} height={800} />
+              <img src={aboutLounge} alt="Gaming lounge" loading="lazy" className="w-full h-80 object-cover" width={3840} height={2160} />
             </div>
           </ScrollReveal>
         </div>
@@ -82,7 +81,7 @@ const About = () => (
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <ScrollReveal>
             <div className="rounded-2xl overflow-hidden glow-orange">
-              <img src={gallery3} alt="PS5 Controller" loading="lazy" className="w-full h-80 object-cover" width={800} height={800} />
+              <img src={aboutLounge} alt="Gaming lounge" loading="lazy" className="w-full h-80 object-cover" width={3840} height={2160} />
             </div>
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
