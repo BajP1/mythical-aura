@@ -46,7 +46,7 @@ const About = () => (
           </ScrollReveal>
           <ScrollReveal delay={0.2}>
             <div className="rounded-2xl overflow-hidden glow-blue">
-              <img src={cabinImg} alt="Gaming cabin" loading="lazy" className="w-full h-80 object-cover" width={800} height={800} />
+              <img src={aboutLounge} alt="Gaming lounge" loading="lazy" className="w-full h-80 object-cover" width={3840} height={2160} />
             </div>
           </ScrollReveal>
         </div>
