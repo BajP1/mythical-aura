@@ -5,7 +5,7 @@ import aboutLounge from "@/assets/about-lounge.jpg";
 
 const whyUs = [
   { icon: Gamepad2, title: "Premium PS5 Consoles", desc: "Latest PlayStation 5 with DualSense controllers for the ultimate gaming experience." },
-  { icon: Shield, title: "Private Gaming Cabins", desc: "10 exclusive cabins with soundproofing, ambient lighting, and personal comfort." },
+  { icon: Shield, title: "Private Gaming Cabins", desc: "10 exclusive cabins with ambient lighting, and personal comfort." },
   { icon: DollarSign, title: "Affordable Luxury", desc: "Premium experience starting at just ₹100/hour. Luxury gaming doesn't have to break the bank." },
 ];
 
