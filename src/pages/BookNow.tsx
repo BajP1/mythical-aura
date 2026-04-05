@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Layers, Gamepad2, Calendar as CalendarIcon, Clock, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn, Glasses } from "lucide-react";
+import { Users, Layers, Gamepad2, Calendar as CalendarIcon, Clock, Timer, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn, Glasses } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ScrollReveal from "@/components/ScrollReveal";
-import { type PlayerType, SECTIONS, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration } from "@/data/bookingData";
+import { type PlayerType, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration } from "@/data/bookingData";
 
 const STEPS = [
   { icon: Users, label: "Players" },
@@ -13,11 +13,15 @@ const STEPS = [
   { icon: Gamepad2, label: "Games" },
   { icon: CalendarIcon, label: "Date" },
   { icon: Clock, label: "Time" },
+  { icon: Timer, label: "Duration" },
   { icon: Phone, label: "Phone" },
   { icon: CreditCard, label: "Summary" },
 ];
 
-const TIMES = ["10:00 AM", "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"];
+const TIMES = ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"];
+
+const HOUR_OPTIONS = [1, 2, 3, 4];
+const MINUTE_OPTIONS = [0, 30];
 
 const PLAYER_OPTIONS: { value: PlayerType; label: string; sub: string; isVR?: boolean }[] = [
   { value: 1, label: "1", sub: "Player" },
@@ -35,13 +39,21 @@ const BookNow = () => {
   const [games, setGames] = useState<string[]>([]);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
+  const [durationHours, setDurationHours] = useState(1);
+  const [durationMinutes, setDurationMinutes] = useState(0);
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
-  const pricing = sectionId && playerType ? getPriceAndDuration(sectionId, playerType) : null;
-  const price = pricing?.price || 0;
-  const duration = pricing?.duration || 0;
+  const totalDuration = durationHours * 60 + durationMinutes;
+
+  // Base price per hour from section data, then scale by duration
+  const basePrice = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.price || 0) : 0;
+  const baseDuration = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.duration || 60) : 60;
+  const pricePerMinute = baseDuration > 0 ? basePrice / baseDuration : 0;
+  const price = Math.round(pricePerMinute * totalDuration);
+
+  const durationLabel = `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
 
   const availableSections = playerType ? getSectionsForPlayerType(playerType) : [];
   const availableGames = sectionId && playerType ? getGamesForSelection(sectionId, playerType) : [];
@@ -68,7 +80,8 @@ const BookNow = () => {
     if (step === 2) return games.length >= 1;
     if (step === 3) return date !== "";
     if (step === 4) return time !== "";
-    if (step === 5) return phone.trim().length >= 10;
+    if (step === 5) return true; // duration always has a default
+    if (step === 6) return phone.trim().length >= 10;
     return true;
   };
 
@@ -86,7 +99,7 @@ const BookNow = () => {
         games,
         date,
         time,
-        duration,
+        duration: totalDuration,
         phone,
         total_price: price,
       }).select("id").single();
@@ -102,7 +115,6 @@ const BookNow = () => {
   };
 
   const today = new Date().toISOString().split("T")[0];
-
   const playerLabel = playerType === "vr" ? "VR Experience" : `${playerType} ${playerType === 1 ? "Player" : "Players"}`;
 
   if (!user) {
@@ -146,7 +158,7 @@ const BookNow = () => {
                   ["Games", games.join(", ")],
                   ["Date", date],
                   ["Time", time],
-                  ["Duration", `${duration} min`],
+                  ["Duration", durationLabel],
                   ["Phone", phone],
                   ["Total", `₹${price}`],
                 ].map(([l, v]) => (
@@ -208,8 +220,7 @@ const BookNow = () => {
                     <span className="block text-muted-foreground text-xs mt-1">Section</span>
                     {opt && (
                       <div className="mt-2 space-y-0.5">
-                        <span className="block text-brand-orange font-display text-xs font-bold">₹{opt.price}</span>
-                        <span className="block text-muted-foreground text-[10px]">{opt.duration} min</span>
+                        <span className="block text-brand-orange font-display text-xs font-bold">₹{opt.price}/hr</span>
                       </div>
                     )}
                   </motion.button>
@@ -270,13 +281,53 @@ const BookNow = () => {
       case 5:
         return (
           <div>
+            <h3 className="heading-md mb-2">Select Duration</h3>
+            <p className="text-muted-foreground mb-8">Choose how long you want to play</p>
+            <div className="max-w-md mx-auto space-y-8">
+              <div>
+                <p className="text-muted-foreground text-sm mb-4 font-display tracking-wider">Hours</p>
+                <div className="grid grid-cols-4 gap-3">
+                  {HOUR_OPTIONS.map((h) => (
+                    <motion.button key={h} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                      onClick={() => setDurationHours(h)}
+                      className={`card-premium text-center py-4 cursor-pointer ${durationHours === h ? "border-brand-orange glow-orange" : ""}`}>
+                      <span className="font-display text-2xl font-bold text-primary">{h}</span>
+                      <span className="block text-muted-foreground text-xs mt-1">{h === 1 ? "Hour" : "Hours"}</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-muted-foreground text-sm mb-4 font-display tracking-wider">Minutes</p>
+                <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
+                  {MINUTE_OPTIONS.map((m) => (
+                    <motion.button key={m} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                      onClick={() => setDurationMinutes(m)}
+                      className={`card-premium text-center py-4 cursor-pointer ${durationMinutes === m ? "border-brand-orange glow-orange" : ""}`}>
+                      <span className="font-display text-2xl font-bold text-primary">{m === 0 ? "00" : "30"}</span>
+                      <span className="block text-muted-foreground text-xs mt-1">Min</span>
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+              <div className="card-premium text-center py-4">
+                <p className="text-muted-foreground text-xs mb-1">Selected Duration & Price</p>
+                <p className="font-display text-2xl font-bold text-primary">{durationLabel}</p>
+                <p className="font-display text-xl font-bold text-brand-orange mt-1">₹{price}</p>
+              </div>
+            </div>
+          </div>
+        );
+      case 6:
+        return (
+          <div>
             <h3 className="heading-md mb-2">Phone Number</h3>
             <p className="text-muted-foreground mb-8">Enter your phone number for booking confirmation</p>
             <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. 9876543210"
               className="w-full max-w-sm mx-auto block glass rounded-xl px-6 py-4 text-primary font-display text-lg bg-transparent border border-border focus:border-brand-orange focus:outline-none transition-colors" />
           </div>
         );
-      case 6:
+      case 7:
         return (
           <div>
             <h3 className="heading-md mb-8 text-center">Booking Summary</h3>
@@ -288,7 +339,7 @@ const BookNow = () => {
                   ["Games", games.join(", ") || "—"],
                   ["Date", date || "—"],
                   ["Time", time || "—"],
-                  ["Duration", `${duration} minutes`],
+                  ["Duration", durationLabel],
                   ["Phone", phone || "—"],
                 ].map(([label, value]) => (
                   <div key={label} className="flex justify-between items-center py-2 border-b border-border/30 last:border-0">
@@ -350,7 +401,7 @@ const BookNow = () => {
           </AnimatePresence>
 
           {/* Nav */}
-          {step < 6 && (
+          {step < 7 && (
             <div className="flex justify-between mt-12">
               <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
                 className="glass rounded-xl px-6 py-3 font-display text-sm tracking-wider text-muted-foreground hover:text-primary disabled:opacity-30 transition-all flex items-center gap-2">
