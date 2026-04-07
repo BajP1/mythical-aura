@@ -12,6 +12,8 @@ import About from "./pages/About";
 import BookNow from "./pages/BookNow";
 import AdminDashboard from "./pages/AdminDashboard";
 import Contact from "./pages/Contact";
+import PaymentTest from "./pages/PaymentTest";
+import PaymentStatus from "./pages/PaymentStatus";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
