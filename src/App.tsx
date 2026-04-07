@@ -12,6 +12,8 @@ import About from "./pages/About";
 import BookNow from "./pages/BookNow";
 import AdminDashboard from "./pages/AdminDashboard";
 import Contact from "./pages/Contact";
+import PaymentTest from "./pages/PaymentTest";
+import PaymentStatus from "./pages/PaymentStatus";
 import NotFound from "./pages/NotFound";
 import { useEffect } from "react";
 
@@ -40,6 +42,8 @@ const AnimatedRoutes = () => {
           <Route path="/book" element={<BookNow />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/payment-test" element={<PaymentTest />} />
+          <Route path="/payment-status" element={<PaymentStatus />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
