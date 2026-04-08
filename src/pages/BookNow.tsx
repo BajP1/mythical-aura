@@ -89,8 +89,9 @@ const BookNow = () => {
     if (!user) return;
     setSaving(true);
     try {
+      // First save booking to database
       const playersNum = playerType === "vr" ? 1 : playerType!;
-      const { data, error } = await supabase.from("bookings").insert({
+      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
         user_id: user.id,
         name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest",
         email: user.email || "",
@@ -104,11 +105,38 @@ const BookNow = () => {
         total_price: price,
       }).select("id").single();
 
-      if (error) throw error;
-      setBookingId(data.id);
-      toast.success("Booking confirmed! 🎮");
+      if (bookingError) throw bookingError;
+
+      // Now create Cashfree payment order
+      toast.loading("Creating payment order...");
+      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-cashfree-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: price,
+          customer_phone: phone,
+          customerName: user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest",
+          customerEmail: user.email || "guest@example.com",
+        }),
+      });
+
+      const paymentData = await response.json();
+      toast.dismiss();
+
+      if (!response.ok || paymentData.error) {
+        throw new Error(paymentData.error || "Failed to create payment order");
+      }
+
+      if (paymentData.payment_session_id) {
+        // Redirect to Cashfree hosted checkout
+        const checkoutUrl = `https://sandbox.cashfree.com/pg/orders/sessions/${paymentData.payment_session_id}`;
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error("No payment session received");
+      }
     } catch (err: any) {
-      toast.error(err.message || "Failed to save booking");
+      toast.dismiss();
+      toast.error(err.message || "Failed to process payment");
     } finally {
       setSaving(false);
     }
@@ -357,7 +385,7 @@ const BookNow = () => {
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={handleConfirmBooking} disabled={saving}
                 className="btn-premium text-lg animate-pulse-glow disabled:opacity-50">
-                {saving ? "Saving..." : `Pay Now — ₹${price}`}
+                {saving ? "Processing Payment..." : `Pay Now — ₹${price}`}
               </motion.button>
             </div>
           </div>
