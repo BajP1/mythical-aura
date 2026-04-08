@@ -11,20 +11,25 @@ const PaymentTest = () => {
   const handlePay = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-cashfree-order", {
-        body: {
-          amount: 1,
-          customerName: "Test User",
-          customerEmail: "test@example.com",
-          customerPhone: "9876543210",
+      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-cashfree-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
         },
+        body: JSON.stringify({
+          amount: 1,
+          customer_phone: "9999999999",
+        }),
       });
 
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      const data = await response.json();
+
+      if (!response.ok || data?.error) {
+        throw new Error(data.error || "Failed to create order");
+      }
 
       if (data?.payment_session_id) {
-        // Redirect to Cashfree hosted checkout
         const checkoutUrl = `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
         window.location.href = checkoutUrl;
       } else {
