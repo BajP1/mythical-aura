@@ -36,8 +36,8 @@ const PaymentStatus = () => {
           {status === "success" && (
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
               <CheckCircle size={64} className="mx-auto mb-6 text-green-500" />
-              <h1 className="heading-xl mb-4">Payment Successful ✅</h1>
-              <p className="subtitle mb-6">Your test payment of ₹1 was processed successfully</p>
+               <h1 className="heading-xl mb-4">Payment Successful ✅</h1>
+              <p className="subtitle mb-6">Your booking has been confirmed and payment processed successfully!</p>
               {orderId && (
                 <div className="card-premium p-6 mb-8">
                   <p className="text-muted-foreground text-sm mb-1">Order ID</p>
@@ -56,7 +56,7 @@ const PaymentStatus = () => {
               <XCircle size={64} className="mx-auto mb-6 text-red-500" />
               <h1 className="heading-xl mb-4">Payment Failed ❌</h1>
               <p className="subtitle mb-6">Something went wrong with your payment</p>
-              <motion.a href="/payment-test" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+              <motion.a href="/book" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 className="btn-premium inline-flex items-center gap-2 text-lg">
                 Try Again
               </motion.a>
