@@ -9,11 +9,15 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { amount, customerName, customerEmail, customerPhone } = await req.json();
+    const body = await req.json();
+    const amount = body.amount;
+    const customerPhone = body.customer_phone || body.customerPhone;
+    const customerName = body.customerName || "Guest";
+    const customerEmail = body.customerEmail || "guest@example.com";
 
-    if (!amount || !customerName || !customerEmail || !customerPhone) {
+    if (!amount || !customerPhone) {
       return new Response(
-        JSON.stringify({ error: "Missing required fields" }),
+        JSON.stringify({ error: "Missing required fields: amount and customer_phone" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
