@@ -1,3 +1,5 @@
+import Terms from "./pages/Terms";
+import Refund from "./pages/Refund";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -41,6 +43,8 @@ const AnimatedRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<BookNow />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/terms" element={<Terms />} />
+        <Route path="/refund" element={<Refund />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/payment-test" element={<PaymentTest />} />
           <Route path="/payment-status" element={<PaymentStatus />} />
