@@ -127,7 +127,13 @@ if (!response.ok) {
   throw new Error(data.error || "Payment failed");
 }
 
-window.location.href = data.payment_link;
+const sessionId = data.payment_session_id;
+
+if (!sessionId) {
+  throw new Error("Payment session not created");
+}
+
+window.location.href = `https://payments.cashfree.com/pg/orders/${sessionId}`;
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");
