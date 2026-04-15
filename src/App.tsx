@@ -1,14 +1,17 @@
 import Terms from "./pages/Terms";
 import Refund from "./pages/Refund";
+
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "framer-motion";
 import { AuthProvider } from "@/contexts/AuthContext";
+
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FloatingButtons from "@/components/FloatingButtons";
+
 import Index from "./pages/Index";
 import About from "./pages/About";
 import BookNow from "./pages/BookNow";
@@ -17,18 +20,26 @@ import Contact from "./pages/Contact";
 import PaymentTest from "./pages/PaymentTest";
 import PaymentStatus from "./pages/PaymentStatus";
 import NotFound from "./pages/NotFound";
+
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
+/* ---------------- SCROLL TO TOP ---------------- */
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return null;
 };
 
+/* ---------------- ANIMATED ROUTES ---------------- */
 const AnimatedRoutes = () => {
   const location = useLocation();
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -43,11 +54,15 @@ const AnimatedRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<BookNow />} />
           <Route path="/contact" element={<Contact />} />
+
+          {/* ✅ NEW PAGES */}
           <Route path="/terms" element={<Terms />} />
-        <Route path="/refund" element={<Refund />} />
+          <Route path="/refund" element={<Refund />} />
+
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/payment-test" element={<PaymentTest />} />
           <Route path="/payment-status" element={<PaymentStatus />} />
+
           <Route path="*" element={<NotFound />} />
         </Routes>
       </motion.div>
@@ -55,23 +70,30 @@ const AnimatedRoutes = () => {
   );
 };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Navbar />
-          <main className="min-h-screen">
-            <AnimatedRoutes />
-          </main>
-          <Footer />
-          <FloatingButtons />
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+/* ---------------- MAIN APP ---------------- */
+const App = () => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Sonner />
+
+          <BrowserRouter>
+            <ScrollToTop />
+
+            <Navbar />
+
+            <main className="min-h-screen">
+              <AnimatedRoutes />
+            </main>
+
+            <Footer />
+            <FloatingButtons />
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
