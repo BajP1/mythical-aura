@@ -109,7 +109,7 @@ const BookNow = () => {
 
       // Now create Cashfree payment order
       // Redirect to Cashfree Payment Page
-window.location.href = "https://payments.cashfree.com/links?code=Za890n8l3od0_AAAAAAACpGY";
+window.location.href = `https://payments.cashfree.com/links?code=Za890n8l3od0_AAAAAAACpGY&amount=${price}&phone=${phone}&name=${encodeURIComponent("Mythical User")}`;
 return;
     } catch (err: any) {
       toast.dismiss();
