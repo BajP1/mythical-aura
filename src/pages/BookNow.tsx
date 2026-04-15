@@ -126,6 +126,7 @@ const data = await response.json();
 if (!response.ok) {
   throw new Error(data.error || "Payment failed");
 }
+
 window.location.href = data.payment_link;
     } catch (err: any) {
       toast.dismiss();
