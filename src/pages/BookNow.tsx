@@ -126,7 +126,7 @@ const data = await response.json();
 if (!response.ok) {
   throw new Error(data.error || "Payment failed");
 }
-window.location.href = `https://api.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
+window.location.href = data.payment_link;
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");
