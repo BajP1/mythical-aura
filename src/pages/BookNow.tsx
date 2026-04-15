@@ -111,9 +111,6 @@ const BookNow = () => {
       // Redirect to Cashfree Payment Page
 window.location.href = "https://payments.cashfree.com/links?code=Za890n8l3od0_AAAAAAACpGY";
 return;
-      } else {
-        throw new Error("No payment session received");
-      }
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");
