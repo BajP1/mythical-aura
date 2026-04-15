@@ -108,9 +108,26 @@ const BookNow = () => {
       if (bookingError) throw bookingError;
 
       // Now create Cashfree payment order
-      // Redirect to Cashfree Payment Page
-window.location.href = `https://payments.cashfree.com/links?code=Za890n8l3od0_AAAAAAACpGY&amount=${price}&phone=${phone}&name=${encodeURIComponent("Mythical User")}`;
-return;
+const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    amount: price,
+    customer_phone: phone,
+    customerName: user.user_metadata?.full_name || "Guest",
+    customerEmail: user.email || "guest@example.com",
+  }),
+});
+
+const data = await response.json();
+
+if (!response.ok) {
+  throw new Error(data.error || "Payment failed");
+}
+
+window.location.href = `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");
