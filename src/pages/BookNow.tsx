@@ -130,7 +130,7 @@ const BookNow = () => {
       }
 
       if (data.payment_link) {
-        window.location.href = data.payment_link;
+        window.location.href = `https://payments.cashfree.com/pg/view/${sessionId}`;
       } else {
         throw new Error("Payment link missing from gateway response");
       }
