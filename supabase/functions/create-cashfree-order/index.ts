@@ -34,7 +34,8 @@ Deno.serve(async (req) => {
 
     const orderId = `TEST_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-    const returnUrl = `https://mythicalgamingstation.lovable.app/payment-status?order_id=${orderId}`;
+    const origin = req.headers.get("origin") || "https://mythicalgamingstation.lovable.app";
+    const returnUrl = `${origin}/payment-status?order_id=${orderId}`;
 
     const orderPayload = {
       order_id: orderId,
