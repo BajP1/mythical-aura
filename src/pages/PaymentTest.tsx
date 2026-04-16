@@ -32,10 +32,8 @@ const PaymentTest = () => {
 
       if (data?.payment_link) {
         window.location.href = data.payment_link;
-      } else if (data?.payment_session_id) {
-        window.location.href = `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
       } else {
-        throw new Error("No payment link or session received");
+        throw new Error("Payment link missing from gateway response");
       }
     } catch (err: any) {
       console.error("Payment error:", err);
