@@ -34,7 +34,8 @@ Deno.serve(async (req) => {
 
     const orderId = `TEST_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-    const returnUrl = `https://mythicalgamingstation.lovable.app/payment-status?order_id=${orderId}`;
+    const origin = req.headers.get("origin") || "https://mythicalgamingstation.lovable.app";
+    const returnUrl = `${origin}/payment-status?order_id=${orderId}`;
 
     const orderPayload = {
       order_id: orderId,
@@ -72,11 +73,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    console.log("Cashfree full response:", JSON.stringify(data));
+
     return new Response(
       JSON.stringify({
         order_id: data.order_id,
         payment_session_id: data.payment_session_id,
-        payment_link: data.payments?.url,
+        payment_link: data.payment_link,
         order_status: data.order_status,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
