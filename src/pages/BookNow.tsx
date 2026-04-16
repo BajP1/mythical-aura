@@ -126,19 +126,22 @@ const BookNow = () => {
       console.log("Cashfree order response:", data);
 
       if (!response.ok || data.error) {
-        throw new Error(data.error || "Payment order creation failed");
-      }
+  const message =
+    data?.error?.message ||
+    (typeof data?.error === "string"
+      ? data.error
+      : JSON.stringify(data.error));
 
-      const paymentUrl =
-  data.payment_link ||
-  data.payment_session_id ||
-  data.url;
-
-if (!paymentUrl) {
-  throw new Error("No payment link returned");
+  throw new Error(message);
 }
 
-window.location.href = paymentUrl;
+if (!data.payment_session_id) {
+  throw new Error("No payment_session_id returned from Cashfree");
+}
+
+// ✅ REDIRECT (CORRECT WAY)
+window.location.href =
+  `https://payments.cashfree.com/order/#${data.payment_session_id}`;
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");
