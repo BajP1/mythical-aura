@@ -65,7 +65,7 @@ const Contact = () => {
                 {/* Map */}
                 <div className="rounded-2xl overflow-hidden border border-border/30 h-64">
                   <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3440.0!2d76.39!3d30.34!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDIwJzI0LjAiTiA3NsKwMjMnMjQuMCJF!5e0!3m2!1sen!2sin!4v1"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3440.0!2d76.38748!3d30.3506327!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391029e87b08843b%3A0xc54324ef66468fb5!2sMythical%20Gaming%20Station!5e0!3m2!1sen!2sin!4v1"
                     width="100%"
                     height="100%"
                     style={{ border: 0, filter: "invert(90%) hue-rotate(180deg)" }}
