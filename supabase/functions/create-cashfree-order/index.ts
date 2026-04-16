@@ -73,11 +73,13 @@ Deno.serve(async (req) => {
       );
     }
 
+    console.log("Cashfree full response:", JSON.stringify(data));
+
     return new Response(
       JSON.stringify({
         order_id: data.order_id,
         payment_session_id: data.payment_session_id,
-        payment_link: data.payments?.url,
+        payment_link: data.payment_link,
         order_status: data.order_status,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

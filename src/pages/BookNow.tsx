@@ -108,32 +108,34 @@ const BookNow = () => {
       if (bookingError) throw bookingError;
 
       // Now create Cashfree payment order
-const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    amount: price,
-    customer_phone: phone,
-    customerName: user.user_metadata?.full_name || "Guest",
-    customerEmail: user.email || "guest@example.com",
-  }),
-});
+      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-cashfree-order", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
+        },
+        body: JSON.stringify({
+          amount: price,
+          customer_phone: phone,
+          customerName: user.user_metadata?.full_name || "Guest",
+          customerEmail: user.email || "guest@example.com",
+        }),
+      });
 
-const data = await response.json();
+      const data = await response.json();
+      console.log("Cashfree order response:", data);
 
-if (!response.ok) {
-  throw new Error(data.error || "Payment failed");
-}
+      if (!response.ok || data.error) {
+        throw new Error(data.error || "Payment order creation failed");
+      }
 
-const sessionId = data.payment_session_id;
-
-if (!sessionId) {
-  throw new Error("Payment session not created");
-}
-
-window.location.href = `https://payments.cashfree.com/pg/orders/${sessionId}`;
+      if (data.payment_link) {
+        window.location.href = data.payment_link;
+      } else if (data.payment_session_id) {
+        window.location.href = `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
+      } else {
+        throw new Error("No payment link or session received from gateway");
+      }
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");

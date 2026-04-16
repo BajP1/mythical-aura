@@ -24,16 +24,18 @@ const PaymentTest = () => {
       });
 
       const data = await response.json();
+      console.log("Cashfree order response:", data);
 
       if (!response.ok || data?.error) {
         throw new Error(data.error || "Failed to create order");
       }
 
-      if (data?.payment_session_id) {
-        const checkoutUrl = `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
-        window.location.href = checkoutUrl;
+      if (data?.payment_link) {
+        window.location.href = data.payment_link;
+      } else if (data?.payment_session_id) {
+        window.location.href = `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}`;
       } else {
-        throw new Error("No payment session received");
+        throw new Error("No payment link or session received");
       }
     } catch (err: any) {
       console.error("Payment error:", err);
