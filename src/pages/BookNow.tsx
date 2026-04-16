@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, Layers, Gamepad2, Calendar as CalendarIcon, Clock, Timer, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn, Glasses } from "lucide-react";
+import { Users, Layers, Gamepad2, Calendar as CalendarIcon, Clock, Timer, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn, Glasses, CircleDot } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ScrollReveal from "@/components/ScrollReveal";
-import { type PlayerType, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration } from "@/data/bookingData";
+import { type PlayerType, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration, isCarWheel } from "@/data/bookingData";
 
 const STEPS = [
   { icon: Users, label: "Players" },
@@ -20,16 +20,29 @@ const STEPS = [
 
 const TIMES = ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"];
 
-const HOUR_OPTIONS = [1, 2, 3, 4];
+const HOUR_OPTIONS = [0, 1, 2, 3, 4, 5];
 const MINUTE_OPTIONS = [0, 30];
 
-const PLAYER_OPTIONS: { value: PlayerType; label: string; sub: string; isVR?: boolean }[] = [
+const PLAYER_OPTIONS: { value: PlayerType; label: string; sub: string; isVR?: boolean; isCarWheel?: boolean }[] = [
   { value: 1, label: "1", sub: "Player" },
   { value: 2, label: "2", sub: "Players" },
   { value: 3, label: "3", sub: "Players" },
   { value: 4, label: "4", sub: "Players" },
   { value: "vr", label: "VR", sub: "Experience", isVR: true },
+  { value: "carwheel1", label: "1P", sub: "Car Wheel", isCarWheel: true },
+  { value: "carwheel2", label: "2P", sub: "Car Wheel", isCarWheel: true },
 ];
+
+// Steering wheel SVG icon
+const SteeringWheelIcon = ({ size = 32, className = "" }: { size?: number; className?: string }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="2" />
+    <path d="M12 14v5" />
+    <path d="M5.5 8.5 10 12" />
+    <path d="M18.5 8.5 14 12" />
+  </svg>
+);
 
 const BookNow = () => {
   const { user, signInWithGoogle } = useAuth();
@@ -45,15 +58,17 @@ const BookNow = () => {
   const [saving, setSaving] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
-  const totalDuration = durationHours * 60 + durationMinutes;
+  const isCarWheelSelected = playerType !== null && isCarWheel(playerType);
 
-  // Base price per hour from section data, then scale by duration
+  // Car wheel has fixed duration/price
+  const totalDuration = isCarWheelSelected ? 30 : durationHours * 60 + durationMinutes;
+
   const basePrice = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.price || 0) : 0;
   const baseDuration = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.duration || 60) : 60;
   const pricePerMinute = baseDuration > 0 ? basePrice / baseDuration : 0;
-  const price = Math.round(pricePerMinute * totalDuration);
+  const price = isCarWheelSelected ? basePrice : Math.round(pricePerMinute * totalDuration);
 
-  const durationLabel = `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
+  const durationLabel = isCarWheelSelected ? "0:30" : `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
 
   const availableSections = playerType ? getSectionsForPlayerType(playerType) : [];
   const availableGames = sectionId && playerType ? getGamesForSelection(sectionId, playerType) : [];
@@ -65,13 +80,36 @@ const BookNow = () => {
 
   const handlePlayerSelect = (p: PlayerType) => {
     setPlayerType(p);
-    setSectionId(null);
-    setGames([]);
+    if (isCarWheel(p)) {
+      // Auto-set section 1 and game "Car Wheel"
+      setSectionId(1);
+      setGames(["Car Wheel"]);
+      setDurationHours(0);
+      setDurationMinutes(30);
+    } else {
+      setSectionId(null);
+      setGames([]);
+    }
   };
 
   const handleSectionSelect = (id: number) => {
     setSectionId(id);
     setGames([]);
+  };
+
+  // Steps to skip for car wheel (section=1, games=2, duration=5 are auto-set)
+  const skippedSteps = isCarWheelSelected ? [1, 2, 5] : [];
+
+  const getNextStep = (current: number): number => {
+    let next = current + 1;
+    while (next < 8 && skippedSteps.includes(next)) next++;
+    return next;
+  };
+
+  const getPrevStep = (current: number): number => {
+    let prev = current - 1;
+    while (prev >= 0 && skippedSteps.includes(prev)) prev--;
+    return Math.max(0, prev);
   };
 
   const canNext = () => {
@@ -80,7 +118,7 @@ const BookNow = () => {
     if (step === 2) return games.length >= 1;
     if (step === 3) return date !== "";
     if (step === 4) return time !== "";
-    if (step === 5) return true; // duration always has a default
+    if (step === 5) return totalDuration > 0;
     if (step === 6) return phone.trim().length >= 10;
     return true;
   };
@@ -89,13 +127,12 @@ const BookNow = () => {
     if (!user) return;
     setSaving(true);
     try {
-      // First save booking to database
-      const playersNum = playerType === "vr" ? 1 : playerType!;
+      const playersNum = playerType === "vr" ? 1 : isCarWheelSelected ? (playerType === "carwheel1" ? 1 : 2) : playerType!;
       const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
         user_id: user.id,
         name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest",
         email: user.email || "",
-        players: playersNum,
+        players: playersNum as number,
         cabin: sectionId,
         games,
         date,
@@ -107,7 +144,6 @@ const BookNow = () => {
 
       if (bookingError) throw bookingError;
 
-      // Now create Cashfree payment order
       const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
         method: "POST",
         headers: {
@@ -126,38 +162,27 @@ const BookNow = () => {
       console.log("Cashfree order response:", data);
 
       if (!response.ok || data.error) {
-  const message =
-    data?.error?.message ||
-    (typeof data?.error === "string"
-      ? data.error
-      : JSON.stringify(data.error));
+        const message = data?.error?.message || (typeof data?.error === "string" ? data.error : JSON.stringify(data.error));
+        throw new Error(message);
+      }
 
-  throw new Error(message);
-}
+      if (!data.payment_session_id) {
+        throw new Error("No payment_session_id returned from Cashfree");
+      }
 
-if (!data.payment_session_id) {
-  throw new Error("No payment_session_id returned from Cashfree");
-}
-
-// ✅ REDIRECT (CORRECT WAY)
-window.location.href =
-  `https://payments.cashfree.com/order/#${data.payment_session_id}`;
+      window.location.href = `https://payments.cashfree.com/order/#${data.payment_session_id}`;
     } catch (err: any) {
-  console.log(err);
-
-  const message =
-    err?.message ||
-    (typeof err === "string" ? err : JSON.stringify(err));
-
-  toast.dismiss();
-  toast.error(message);
-} finally {
+      console.log(err);
+      const message = err?.message || (typeof err === "string" ? err : JSON.stringify(err));
+      toast.dismiss();
+      toast.error(message);
+    } finally {
       setSaving(false);
     }
   };
 
   const today = new Date().toISOString().split("T")[0];
-  const playerLabel = playerType === "vr" ? "VR Experience" : `${playerType} ${playerType === 1 ? "Player" : "Players"}`;
+  const playerLabel = playerType === "vr" ? "VR Experience" : isCarWheelSelected ? `Car Wheel (${playerType === "carwheel1" ? "1 Player" : "2 Players"})` : `${playerType} ${playerType === 1 ? "Player" : "Players"}`;
 
   if (!user) {
     return (
@@ -223,22 +248,42 @@ window.location.href =
         return (
           <div>
             <h3 className="heading-md mb-2">Select Players</h3>
-            <p className="text-muted-foreground mb-8">Choose player count or VR experience</p>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              {PLAYER_OPTIONS.map((opt) => (
+            <p className="text-muted-foreground mb-8">Choose player count, VR, or Car Wheel experience</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+              {PLAYER_OPTIONS.filter(o => !o.isVR && !o.isCarWheel).map((opt) => (
                 <motion.button key={String(opt.value)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                   onClick={() => handlePlayerSelect(opt.value)}
-                  className={`card-premium text-center py-8 cursor-pointer relative ${playerType === opt.value ? "border-brand-orange glow-orange" : ""} ${opt.isVR ? "ring-1 ring-purple-500/40" : ""}`}>
-                  {opt.isVR && (
-                    <span className="absolute top-2 right-2 text-[10px] font-display font-bold tracking-wider bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">VR 🎮</span>
-                  )}
-                  {opt.isVR ? (
-                    <Glasses size={32} className="mx-auto mb-2 text-purple-400" />
-                  ) : (
-                    <span className="font-display text-4xl font-bold text-primary">{opt.label}</span>
-                  )}
-                  {opt.isVR && <span className="font-display text-2xl font-bold text-primary block">{opt.label}</span>}
+                  className={`card-premium text-center py-8 cursor-pointer relative ${playerType === opt.value ? "border-brand-orange glow-orange" : ""}`}>
+                  <span className="font-display text-4xl font-bold text-primary">{opt.label}</span>
                   <span className="block text-muted-foreground text-sm mt-2">{opt.sub}</span>
+                </motion.button>
+              ))}
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {/* VR */}
+              {PLAYER_OPTIONS.filter(o => o.isVR).map((opt) => (
+                <motion.button key={String(opt.value)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  onClick={() => handlePlayerSelect(opt.value)}
+                  className={`card-premium text-center py-8 cursor-pointer relative ring-1 ring-purple-500/40 ${playerType === opt.value ? "border-brand-orange glow-orange" : ""}`}>
+                  <span className="absolute top-2 right-2 text-[10px] font-display font-bold tracking-wider bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-full">VR 🎮</span>
+                  <Glasses size={32} className="mx-auto mb-2 text-purple-400" />
+                  <span className="font-display text-2xl font-bold text-primary block">{opt.label}</span>
+                  <span className="block text-muted-foreground text-sm mt-2">{opt.sub}</span>
+                  <span className="block text-brand-orange font-display text-xs font-bold mt-1">₹200/hr</span>
+                </motion.button>
+              ))}
+              {/* Car Wheel options */}
+              {PLAYER_OPTIONS.filter(o => o.isCarWheel).map((opt) => (
+                <motion.button key={String(opt.value)} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  onClick={() => handlePlayerSelect(opt.value)}
+                  className={`card-premium text-center py-8 cursor-pointer relative ring-1 ring-amber-500/40 ${playerType === opt.value ? "border-brand-orange glow-orange" : ""}`}>
+                  <span className="absolute top-2 right-2 text-[10px] font-display font-bold tracking-wider bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-full">🏎️</span>
+                  <SteeringWheelIcon size={32} className="mx-auto mb-2 text-amber-400" />
+                  <span className="font-display text-2xl font-bold text-primary block">{opt.label}</span>
+                  <span className="block text-muted-foreground text-sm mt-2">{opt.sub}</span>
+                  <span className="block text-brand-orange font-display text-xs font-bold mt-1">
+                    ₹{opt.value === "carwheel1" ? "100" : "200"}/30min
+                  </span>
                 </motion.button>
               ))}
             </div>
@@ -262,7 +307,7 @@ window.location.href =
                     <span className="block text-muted-foreground text-xs mt-1">Section</span>
                     {opt && (
                       <div className="mt-2 space-y-0.5">
-                        <span className="block text-brand-orange font-display text-xs font-bold">₹{opt.price}/hr</span>
+                        <span className="block text-brand-orange font-display text-xs font-bold">₹{opt.price}/{opt.duration >= 60 ? "hr" : `${opt.duration}min`}</span>
                       </div>
                     )}
                   </motion.button>
@@ -328,10 +373,14 @@ window.location.href =
             <div className="max-w-md mx-auto space-y-8">
               <div>
                 <p className="text-muted-foreground text-sm mb-4 font-display tracking-wider">Hours</p>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
                   {HOUR_OPTIONS.map((h) => (
                     <motion.button key={h} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      onClick={() => setDurationHours(h)}
+                      onClick={() => {
+                        setDurationHours(h);
+                        // If 0 hours and 0 minutes, auto-set minutes to 30
+                        if (h === 0 && durationMinutes === 0) setDurationMinutes(30);
+                      }}
                       className={`card-premium text-center py-4 cursor-pointer ${durationHours === h ? "border-brand-orange glow-orange" : ""}`}>
                       <span className="font-display text-2xl font-bold text-primary">{h}</span>
                       <span className="block text-muted-foreground text-xs mt-1">{h === 1 ? "Hour" : "Hours"}</span>
@@ -342,14 +391,18 @@ window.location.href =
               <div>
                 <p className="text-muted-foreground text-sm mb-4 font-display tracking-wider">Minutes</p>
                 <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
-                  {MINUTE_OPTIONS.map((m) => (
-                    <motion.button key={m} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      onClick={() => setDurationMinutes(m)}
-                      className={`card-premium text-center py-4 cursor-pointer ${durationMinutes === m ? "border-brand-orange glow-orange" : ""}`}>
-                      <span className="font-display text-2xl font-bold text-primary">{m === 0 ? "00" : "30"}</span>
-                      <span className="block text-muted-foreground text-xs mt-1">Min</span>
-                    </motion.button>
-                  ))}
+                  {MINUTE_OPTIONS.map((m) => {
+                    // Disable 00 minutes if 0 hours (would result in 0 total)
+                    const disabled = durationHours === 0 && m === 0;
+                    return (
+                      <motion.button key={m} whileHover={disabled ? {} : { scale: 1.05 }} whileTap={disabled ? {} : { scale: 0.95 }}
+                        onClick={() => !disabled && setDurationMinutes(m)}
+                        className={`card-premium text-center py-4 cursor-pointer ${durationMinutes === m ? "border-brand-orange glow-orange" : ""} ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}>
+                        <span className="font-display text-2xl font-bold text-primary">{m === 0 ? "00" : "30"}</span>
+                        <span className="block text-muted-foreground text-xs mt-1">Min</span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
               <div className="card-premium text-center py-4">
@@ -418,21 +471,24 @@ window.location.href =
 
           {/* Progress */}
           <div className="flex items-center justify-between mb-12 overflow-x-auto pb-4">
-            {STEPS.map((s, i) => (
-              <div key={i} className="flex items-center">
-                <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${i <= step ? "opacity-100" : "opacity-40"}`}
-                  onClick={() => i < step && setStep(i)}>
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${i === step ? "glow-orange" : ""} ${i < step ? "bg-brand-orange/20" : "glass"}`}
-                    style={i === step ? { background: "linear-gradient(135deg, hsl(33,100%,50%), hsl(0,100%,62%))" } : {}}>
-                    {i < step ? <Check size={18} className="text-brand-orange" /> : <s.icon size={18} className={i === step ? "text-foreground" : "text-muted-foreground"} />}
+            {STEPS.map((s, i) => {
+              if (skippedSteps.includes(i)) return null;
+              return (
+                <div key={i} className="flex items-center">
+                  <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${i <= step ? "opacity-100" : "opacity-40"}`}
+                    onClick={() => i < step && !skippedSteps.includes(i) && setStep(i)}>
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${i === step ? "glow-orange" : ""} ${i < step ? "bg-brand-orange/20" : "glass"}`}
+                      style={i === step ? { background: "linear-gradient(135deg, hsl(33,100%,50%), hsl(0,100%,62%))" } : {}}>
+                      {i < step ? <Check size={18} className="text-brand-orange" /> : <s.icon size={18} className={i === step ? "text-foreground" : "text-muted-foreground"} />}
+                    </div>
+                    <span className={`text-xs mt-2 font-display tracking-wider hidden sm:block ${i === step ? "text-brand-orange" : "text-muted-foreground"}`}>{s.label}</span>
                   </div>
-                  <span className={`text-xs mt-2 font-display tracking-wider hidden sm:block ${i === step ? "text-brand-orange" : "text-muted-foreground"}`}>{s.label}</span>
+                  {i < STEPS.length - 1 && !skippedSteps.includes(i) && (
+                    <div className={`w-8 sm:w-12 h-px mx-1 transition-colors duration-300 ${i < step ? "bg-brand-orange/50" : "bg-border"}`} />
+                  )}
                 </div>
-                {i < STEPS.length - 1 && (
-                  <div className={`w-8 sm:w-12 h-px mx-1 transition-colors duration-300 ${i < step ? "bg-brand-orange/50" : "bg-border"}`} />
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Step Content */}
@@ -445,11 +501,11 @@ window.location.href =
           {/* Nav */}
           {step < 7 && (
             <div className="flex justify-between mt-12">
-              <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
+              <button onClick={() => setStep(getPrevStep(step))} disabled={step === 0}
                 className="glass rounded-xl px-6 py-3 font-display text-sm tracking-wider text-muted-foreground hover:text-primary disabled:opacity-30 transition-all flex items-center gap-2">
                 <ChevronLeft size={16} /> Back
               </button>
-              <button onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()}
+              <button onClick={() => canNext() && setStep(getNextStep(step))} disabled={!canNext()}
                 className="btn-premium flex items-center gap-2 disabled:opacity-30">
                 Next <ChevronRight size={16} />
               </button>

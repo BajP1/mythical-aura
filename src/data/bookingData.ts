@@ -1,4 +1,4 @@
-export type PlayerType = 1 | 2 | 3 | 4 | "vr";
+export type PlayerType = 1 | 2 | 3 | 4 | "vr" | "carwheel1" | "carwheel2";
 
 export interface SectionOption {
   players: PlayerType;
@@ -20,6 +20,8 @@ export const SECTIONS: Section[] = [
     options: [
       { players: 1, price: 100, duration: 30, games: ["Assetto Corsa Competizione", "Gran Turismo", "NFS Unbound", "Monster Jam Showdown", "Forza Horizon 5", "F1 25"] },
       { players: 2, price: 200, duration: 60, games: ["Gran Turismo", "Monster Jam Showdown", "F1 25"] },
+      { players: "carwheel1", price: 100, duration: 30, games: ["Car Wheel"] },
+      { players: "carwheel2", price: 200, duration: 30, games: ["Car Wheel"] },
     ],
   },
   {
@@ -57,7 +59,7 @@ export const SECTIONS: Section[] = [
     label: "Section 5",
     options: [
       { players: 1, price: 100, duration: 60, games: ["Tekken 8", "Mortal Kombat 1", "Ghost of Tsushima", "The Last of Us Part 2", "The Last of Us Part 1", "Resident Evil 4"] },
-      { players: "vr", price: 100, duration: 60, games: ["Resident Evil Village", "Resident Evil 4", "Dead Land", "Swordsman", "Metro Awakening", "Metal Hellsinger"] },
+      { players: "vr", price: 200, duration: 60, games: ["Resident Evil Village", "Resident Evil 4", "Dead Land", "Swordsman", "Metro Awakening", "Metal Hellsinger"] },
       { players: 2, price: 150, duration: 60, games: ["Tekken 8", "Mortal Kombat 1"] },
     ],
   },
@@ -113,9 +115,16 @@ export const SECTIONS: Section[] = [
   },
 ];
 
+export function isCarWheel(pt: PlayerType): boolean {
+  return pt === "carwheel1" || pt === "carwheel2";
+}
+
 export function getSectionsForPlayerType(playerType: PlayerType): Section[] {
   if (playerType === "vr") {
     return SECTIONS.filter((s) => s.options.some((o) => o.players === "vr"));
+  }
+  if (isCarWheel(playerType)) {
+    return SECTIONS.filter((s) => s.options.some((o) => o.players === playerType));
   }
   return SECTIONS.filter((s) => s.options.some((o) => o.players === playerType));
 }
