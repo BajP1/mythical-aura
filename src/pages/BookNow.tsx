@@ -143,9 +143,15 @@ if (!data.payment_session_id) {
 window.location.href =
   `https://payments.cashfree.com/order/#${data.payment_session_id}`;
     } catch (err: any) {
-      toast.dismiss();
-      toast.error(err.message || "Failed to process payment");
-    } finally {
+  console.log(err);
+
+  const message =
+    err?.message ||
+    (typeof err === "string" ? err : JSON.stringify(err));
+
+  toast.dismiss();
+  toast.error(message);
+} finally {
       setSaving(false);
     }
   };
