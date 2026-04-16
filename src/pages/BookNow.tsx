@@ -129,11 +129,16 @@ const BookNow = () => {
         throw new Error(data.error || "Payment order creation failed");
       }
 
-      if (data.payment_link) {
-        window.location.href = `https://payments.cashfree.com/pg/view/${sessionId}`;
-      } else {
-        throw new Error("Payment link missing from gateway response");
-      }
+      const paymentUrl =
+  data.payment_link ||
+  data.payment_session_id ||
+  data.url;
+
+if (!paymentUrl) {
+  throw new Error("No payment link returned");
+}
+
+window.location.href = paymentUrl;
     } catch (err: any) {
       toast.dismiss();
       toast.error(err.message || "Failed to process payment");
