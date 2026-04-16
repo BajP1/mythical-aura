@@ -75,11 +75,15 @@ Deno.serve(async (req) => {
 
     console.log("Cashfree full response:", JSON.stringify(data));
 
+    // Construct payment_link from session_id if Cashfree doesn't return one
+    const paymentLink = data.payment_link || 
+      (data.payment_session_id ? `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}` : null);
+
     return new Response(
       JSON.stringify({
         order_id: data.order_id,
         payment_session_id: data.payment_session_id,
-        payment_link: data.payment_link,
+        payment_link: paymentLink,
         order_status: data.order_status,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
