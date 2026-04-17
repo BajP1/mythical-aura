@@ -13,6 +13,7 @@ const navLinks = [
   { to: "/about", label: "About" },
   { to: "/book", label: "Book Now" },
   { to: "/contact", label: "Contact" },
+  { to: "/history", label: "History" },
 ];
 
 const Navbar = () => {
