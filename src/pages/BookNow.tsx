@@ -60,15 +60,14 @@ const BookNow = () => {
 
   const isCarWheelSelected = playerType !== null && isCarWheel(playerType);
 
-  // Car wheel has fixed duration/price
-  const totalDuration = isCarWheelSelected ? 30 : durationHours * 60 + durationMinutes;
+  const totalDuration = durationHours * 60 + durationMinutes;
 
   const basePrice = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.price || 0) : 0;
   const baseDuration = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.duration || 60) : 60;
   const pricePerMinute = baseDuration > 0 ? basePrice / baseDuration : 0;
-  const price = isCarWheelSelected ? basePrice : Math.round(pricePerMinute * totalDuration);
+  const price = Math.round(pricePerMinute * totalDuration);
 
-  const durationLabel = isCarWheelSelected ? "0:30" : `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
+  const durationLabel = `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
 
   const availableSections = playerType ? getSectionsForPlayerType(playerType) : [];
   const availableGames = sectionId && playerType ? getGamesForSelection(sectionId, playerType) : [];
@@ -80,36 +79,21 @@ const BookNow = () => {
 
   const handlePlayerSelect = (p: PlayerType) => {
     setPlayerType(p);
+    setSectionId(null);
+    setGames([]);
     if (isCarWheel(p)) {
-      // Auto-set section 1 and game "Car Wheel"
-      setSectionId(1);
-      setGames(["Car Wheel"]);
+      // Default duration to 30 minutes for car wheel
       setDurationHours(0);
       setDurationMinutes(30);
     } else {
-      setSectionId(null);
-      setGames([]);
+      setDurationHours(1);
+      setDurationMinutes(0);
     }
   };
 
   const handleSectionSelect = (id: number) => {
     setSectionId(id);
     setGames([]);
-  };
-
-  // Steps to skip for car wheel (section=1, games=2, duration=5 are auto-set)
-  const skippedSteps = isCarWheelSelected ? [1, 2, 5] : [];
-
-  const getNextStep = (current: number): number => {
-    let next = current + 1;
-    while (next < 8 && skippedSteps.includes(next)) next++;
-    return next;
-  };
-
-  const getPrevStep = (current: number): number => {
-    let prev = current - 1;
-    while (prev >= 0 && skippedSteps.includes(prev)) prev--;
-    return Math.max(0, prev);
   };
 
   const canNext = () => {
