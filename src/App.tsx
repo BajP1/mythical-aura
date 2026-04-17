@@ -19,6 +19,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Contact from "./pages/Contact";
 import PaymentTest from "./pages/PaymentTest";
 import PaymentStatus from "./pages/PaymentStatus";
+import History from "./pages/History";
 import NotFound from "./pages/NotFound";
 
 import { useEffect } from "react";
@@ -54,6 +55,7 @@ const AnimatedRoutes = () => {
           <Route path="/about" element={<About />} />
           <Route path="/book" element={<BookNow />} />
           <Route path="/contact" element={<Contact />} />
+          <Route path="/history" element={<History />} />
 
           {/* ✅ NEW PAGES */}
           <Route path="/terms" element={<Terms />} />
