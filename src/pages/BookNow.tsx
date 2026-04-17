@@ -60,15 +60,14 @@ const BookNow = () => {
 
   const isCarWheelSelected = playerType !== null && isCarWheel(playerType);
 
-  // Car wheel has fixed duration/price
-  const totalDuration = isCarWheelSelected ? 30 : durationHours * 60 + durationMinutes;
+  const totalDuration = durationHours * 60 + durationMinutes;
 
   const basePrice = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.price || 0) : 0;
   const baseDuration = sectionId && playerType ? (getPriceAndDuration(sectionId, playerType)?.duration || 60) : 60;
   const pricePerMinute = baseDuration > 0 ? basePrice / baseDuration : 0;
-  const price = isCarWheelSelected ? basePrice : Math.round(pricePerMinute * totalDuration);
+  const price = Math.round(pricePerMinute * totalDuration);
 
-  const durationLabel = isCarWheelSelected ? "0:30" : `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
+  const durationLabel = `${durationHours}:${durationMinutes === 0 ? "00" : "30"}`;
 
   const availableSections = playerType ? getSectionsForPlayerType(playerType) : [];
   const availableGames = sectionId && playerType ? getGamesForSelection(sectionId, playerType) : [];
@@ -80,36 +79,21 @@ const BookNow = () => {
 
   const handlePlayerSelect = (p: PlayerType) => {
     setPlayerType(p);
+    setSectionId(null);
+    setGames([]);
     if (isCarWheel(p)) {
-      // Auto-set section 1 and game "Car Wheel"
-      setSectionId(1);
-      setGames(["Car Wheel"]);
+      // Default duration to 30 minutes for car wheel
       setDurationHours(0);
       setDurationMinutes(30);
     } else {
-      setSectionId(null);
-      setGames([]);
+      setDurationHours(1);
+      setDurationMinutes(0);
     }
   };
 
   const handleSectionSelect = (id: number) => {
     setSectionId(id);
     setGames([]);
-  };
-
-  // Steps to skip for car wheel (section=1, games=2, duration=5 are auto-set)
-  const skippedSteps = isCarWheelSelected ? [1, 2, 5] : [];
-
-  const getNextStep = (current: number): number => {
-    let next = current + 1;
-    while (next < 8 && skippedSteps.includes(next)) next++;
-    return next;
-  };
-
-  const getPrevStep = (current: number): number => {
-    let prev = current - 1;
-    while (prev >= 0 && skippedSteps.includes(prev)) prev--;
-    return Math.max(0, prev);
   };
 
   const canNext = () => {
@@ -472,18 +456,17 @@ const BookNow = () => {
           {/* Progress */}
           <div className="flex items-center justify-between mb-12 overflow-x-auto pb-4">
             {STEPS.map((s, i) => {
-              if (skippedSteps.includes(i)) return null;
               return (
                 <div key={i} className="flex items-center">
                   <div className={`flex flex-col items-center cursor-pointer transition-all duration-300 ${i <= step ? "opacity-100" : "opacity-40"}`}
-                    onClick={() => i < step && !skippedSteps.includes(i) && setStep(i)}>
+                    onClick={() => i < step && setStep(i)}>
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${i === step ? "glow-orange" : ""} ${i < step ? "bg-brand-orange/20" : "glass"}`}
                       style={i === step ? { background: "linear-gradient(135deg, hsl(33,100%,50%), hsl(0,100%,62%))" } : {}}>
                       {i < step ? <Check size={18} className="text-brand-orange" /> : <s.icon size={18} className={i === step ? "text-foreground" : "text-muted-foreground"} />}
                     </div>
                     <span className={`text-xs mt-2 font-display tracking-wider hidden sm:block ${i === step ? "text-brand-orange" : "text-muted-foreground"}`}>{s.label}</span>
                   </div>
-                  {i < STEPS.length - 1 && !skippedSteps.includes(i) && (
+                  {i < STEPS.length - 1 && (
                     <div className={`w-8 sm:w-12 h-px mx-1 transition-colors duration-300 ${i < step ? "bg-brand-orange/50" : "bg-border"}`} />
                   )}
                 </div>
@@ -501,11 +484,11 @@ const BookNow = () => {
           {/* Nav */}
           {step < 7 && (
             <div className="flex justify-between mt-12">
-              <button onClick={() => setStep(getPrevStep(step))} disabled={step === 0}
+              <button onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0}
                 className="glass rounded-xl px-6 py-3 font-display text-sm tracking-wider text-muted-foreground hover:text-primary disabled:opacity-30 transition-all flex items-center gap-2">
                 <ChevronLeft size={16} /> Back
               </button>
-              <button onClick={() => canNext() && setStep(getNextStep(step))} disabled={!canNext()}
+              <button onClick={() => canNext() && setStep(step + 1)} disabled={!canNext()}
                 className="btn-premium flex items-center gap-2 disabled:opacity-30">
                 Next <ChevronRight size={16} />
               </button>
