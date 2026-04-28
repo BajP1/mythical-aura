@@ -151,28 +151,18 @@ const BookNow = () => {
         duration: totalDuration,
         phone,
         total_price: price,
-        status: "pending",
+        payment_status: "pending",
+        payment_method: paymentMethod,
       };
 
-      // Try to persist payment metadata if those columns exist; ignore if they don't.
       const { data: bookingData, error: bookingError } = await supabase
         .from("bookings")
-        .insert({ ...bookingPayload, payment_status: "pending", payment_method: paymentMethod } as any)
+        .insert(bookingPayload as any)
         .select("id")
         .single();
 
-      let createdId: string | null = bookingData?.id ?? null;
-
-      if (bookingError) {
-        // Fallback: insert without the new payment columns (older schema)
-        const fallback = await supabase
-          .from("bookings")
-          .insert(bookingPayload)
-          .select("id")
-          .single();
-        if (fallback.error) throw fallback.error;
-        createdId = fallback.data.id;
-      }
+      if (bookingError) throw bookingError;
+      const createdId: string | null = bookingData?.id ?? null;
 
       // ============================================================
       // PAYMENT MODE BRANCHING
