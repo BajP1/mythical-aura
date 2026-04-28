@@ -521,10 +521,7 @@ const BookNow = () => {
         );
     }
   };
-          </div>
-        );
-    }
-  };
+
 
   return (
     <div>
