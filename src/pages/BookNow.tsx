@@ -133,7 +133,13 @@ const BookNow = () => {
     setSaving(true);
     try {
       const playersNum = playerType === "vr" ? 1 : isCarWheelSelected ? (playerType === "carwheel1" ? 1 : 2) : playerType!;
-      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
+
+      // Determine payment metadata based on current mode
+      const paymentMethod =
+        PAYMENT_MODE === "PAY_ON_DESK" ? "pay_on_desk" :
+        PAYMENT_MODE === "CASHFREE" ? "cashfree" : "razorpay";
+
+      const bookingPayload: Record<string, any> = {
         user_id: user.id,
         name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest",
         email: user.email || "",
@@ -145,39 +151,76 @@ const BookNow = () => {
         duration: totalDuration,
         phone,
         total_price: price,
-      }).select("id").single();
+        status: "pending",
+      };
 
-      if (bookingError) throw bookingError;
+      // Try to persist payment metadata if those columns exist; ignore if they don't.
+      const { data: bookingData, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({ ...bookingPayload, payment_status: "pending", payment_method: paymentMethod } as any)
+        .select("id")
+        .single();
 
-      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
-        },
-        body: JSON.stringify({
+      let createdId: string | null = bookingData?.id ?? null;
+
+      if (bookingError) {
+        // Fallback: insert without the new payment columns (older schema)
+        const fallback = await supabase
+          .from("bookings")
+          .insert(bookingPayload)
+          .select("id")
+          .single();
+        if (fallback.error) throw fallback.error;
+        createdId = fallback.data.id;
+      }
+
+      // ============================================================
+      // PAYMENT MODE BRANCHING
+      // ============================================================
+      if (PAYMENT_MODE === "PAY_ON_DESK") {
+        toast.success("Booking Confirmed — Pay at Desk");
+        setBookingId(createdId);
+        return;
+      }
+
+      if (PAYMENT_MODE === "CASHFREE") {
+        // Existing Cashfree flow — preserved for future re-enable.
+        const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
+          },
+          body: JSON.stringify({
+            amount: price,
+            customer_phone: phone,
+            customerName: user.user_metadata?.full_name || "Guest",
+            customerEmail: user.email || "guest@example.com",
+          }),
+        });
+        const data = await response.json();
+        console.log("Cashfree order response:", data);
+        if (!response.ok || data.error) {
+          const message = data?.error?.message || (typeof data?.error === "string" ? data.error : JSON.stringify(data.error));
+          throw new Error(message);
+        }
+        if (!data.payment_session_id) throw new Error("No payment_session_id returned from Cashfree");
+        window.location.href = `https://payments.cashfree.com/order/#${data.payment_session_id}`;
+        return;
+      }
+
+      if (PAYMENT_MODE === "RAZORPAY") {
+        await initRazorpayPayment({
           amount: price,
           customer_phone: phone,
-          customerName: user.user_metadata?.full_name || "Guest",
-          customerEmail: user.email || "guest@example.com",
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Cashfree order response:", data);
-
-      if (!response.ok || data.error) {
-        const message = data?.error?.message || (typeof data?.error === "string" ? data.error : JSON.stringify(data.error));
-        throw new Error(message);
+          customer_name: user.user_metadata?.full_name || "Guest",
+          customer_email: user.email || "guest@example.com",
+          booking_id: createdId || "",
+        });
+        return;
       }
-
-      if (!data.payment_session_id) {
-        throw new Error("No payment_session_id returned from Cashfree");
-      }
-
-      window.location.href = `https://payments.cashfree.com/order/#${data.payment_session_id}`;
     } catch (err: any) {
-      console.log(err);
+      console.error("Booking error:", err);
       const message = err?.message || (typeof err === "string" ? err : JSON.stringify(err));
       toast.dismiss();
       toast.error(message);
