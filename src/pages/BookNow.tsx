@@ -7,6 +7,27 @@ import { toast } from "sonner";
 import ScrollReveal from "@/components/ScrollReveal";
 import { type PlayerType, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration, isCarWheel } from "@/data/bookingData";
 
+/* ============================================================
+ * PAYMENT MODE SWITCH
+ * Change this single constant to flip between gateways later.
+ * Supported: "PAY_ON_DESK" | "CASHFREE" | "RAZORPAY"
+ * ============================================================ */
+type PaymentMode = "PAY_ON_DESK" | "CASHFREE" | "RAZORPAY";
+const PAYMENT_MODE: PaymentMode = "PAY_ON_DESK";
+
+// Placeholder for future Razorpay integration
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const initRazorpayPayment = async (_orderData: {
+  amount: number;
+  customer_phone: string;
+  customer_name: string;
+  customer_email: string;
+  booking_id: string;
+}) => {
+  // TODO: Implement Razorpay checkout flow here in the future.
+  throw new Error("Razorpay integration is not implemented yet.");
+};
+
 const STEPS = [
   { icon: Users, label: "Players" },
   { icon: Layers, label: "Section" },
@@ -112,7 +133,13 @@ const BookNow = () => {
     setSaving(true);
     try {
       const playersNum = playerType === "vr" ? 1 : isCarWheelSelected ? (playerType === "carwheel1" ? 1 : 2) : playerType!;
-      const { data: bookingData, error: bookingError } = await supabase.from("bookings").insert({
+
+      // Determine payment metadata based on current mode
+      const paymentMethod =
+        PAYMENT_MODE === "PAY_ON_DESK" ? "pay_on_desk" :
+        PAYMENT_MODE === "CASHFREE" ? "cashfree" : "razorpay";
+
+      const bookingPayload: Record<string, any> = {
         user_id: user.id,
         name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest",
         email: user.email || "",
@@ -124,39 +151,76 @@ const BookNow = () => {
         duration: totalDuration,
         phone,
         total_price: price,
-      }).select("id").single();
+        status: "pending",
+      };
 
-      if (bookingError) throw bookingError;
+      // Try to persist payment metadata if those columns exist; ignore if they don't.
+      const { data: bookingData, error: bookingError } = await supabase
+        .from("bookings")
+        .insert({ ...bookingPayload, payment_status: "pending", payment_method: paymentMethod } as any)
+        .select("id")
+        .single();
 
-      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
-        },
-        body: JSON.stringify({
+      let createdId: string | null = bookingData?.id ?? null;
+
+      if (bookingError) {
+        // Fallback: insert without the new payment columns (older schema)
+        const fallback = await supabase
+          .from("bookings")
+          .insert(bookingPayload)
+          .select("id")
+          .single();
+        if (fallback.error) throw fallback.error;
+        createdId = fallback.data.id;
+      }
+
+      // ============================================================
+      // PAYMENT MODE BRANCHING
+      // ============================================================
+      if (PAYMENT_MODE === "PAY_ON_DESK") {
+        toast.success("Booking Confirmed — Pay at Desk");
+        setBookingId(createdId);
+        return;
+      }
+
+      if (PAYMENT_MODE === "CASHFREE") {
+        // Existing Cashfree flow — preserved for future re-enable.
+        const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
+          },
+          body: JSON.stringify({
+            amount: price,
+            customer_phone: phone,
+            customerName: user.user_metadata?.full_name || "Guest",
+            customerEmail: user.email || "guest@example.com",
+          }),
+        });
+        const data = await response.json();
+        console.log("Cashfree order response:", data);
+        if (!response.ok || data.error) {
+          const message = data?.error?.message || (typeof data?.error === "string" ? data.error : JSON.stringify(data.error));
+          throw new Error(message);
+        }
+        if (!data.payment_session_id) throw new Error("No payment_session_id returned from Cashfree");
+        window.location.href = `https://payments.cashfree.com/order/#${data.payment_session_id}`;
+        return;
+      }
+
+      if (PAYMENT_MODE === "RAZORPAY") {
+        await initRazorpayPayment({
           amount: price,
           customer_phone: phone,
-          customerName: user.user_metadata?.full_name || "Guest",
-          customerEmail: user.email || "guest@example.com",
-        }),
-      });
-
-      const data = await response.json();
-      console.log("Cashfree order response:", data);
-
-      if (!response.ok || data.error) {
-        const message = data?.error?.message || (typeof data?.error === "string" ? data.error : JSON.stringify(data.error));
-        throw new Error(message);
+          customer_name: user.user_metadata?.full_name || "Guest",
+          customer_email: user.email || "guest@example.com",
+          booking_id: createdId || "",
+        });
+        return;
       }
-
-      if (!data.payment_session_id) {
-        throw new Error("No payment_session_id returned from Cashfree");
-      }
-
-      window.location.href = `https://payments.cashfree.com/order/#${data.payment_session_id}`;
     } catch (err: any) {
-      console.log(err);
+      console.error("Booking error:", err);
       const message = err?.message || (typeof err === "string" ? err : JSON.stringify(err));
       toast.dismiss();
       toast.error(message);
@@ -430,19 +494,34 @@ const BookNow = () => {
                   <span className="font-display text-lg text-primary">Total</span>
                   <span className="font-display text-3xl font-bold text-brand-orange">₹{price}</span>
                 </div>
+                {PAYMENT_MODE === "PAY_ON_DESK" && (
+                  <div className="flex justify-end">
+                    <span className="text-xs font-display tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+                      Payment: Pay at Desk
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
             <div className="text-center mt-8">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={handleConfirmBooking} disabled={saving}
                 className="btn-premium text-lg animate-pulse-glow disabled:opacity-50">
-                {saving ? "Processing Payment..." : `Pay Now — ₹${price}`}
+                {saving
+                  ? (PAYMENT_MODE === "PAY_ON_DESK" ? "Confirming..." : "Processing Payment...")
+                  : (PAYMENT_MODE === "PAY_ON_DESK" ? `Confirm Booking — ₹${price}` : `Pay Now — ₹${price}`)}
               </motion.button>
+              {PAYMENT_MODE === "PAY_ON_DESK" && (
+                <p className="text-xs text-muted-foreground mt-3">
+                  No online payment required. Pay at the desk on arrival.
+                </p>
+              )}
             </div>
           </div>
         );
     }
   };
+
 
   return (
     <div>
