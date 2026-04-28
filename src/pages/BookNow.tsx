@@ -7,6 +7,27 @@ import { toast } from "sonner";
 import ScrollReveal from "@/components/ScrollReveal";
 import { type PlayerType, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration, isCarWheel } from "@/data/bookingData";
 
+/* ============================================================
+ * PAYMENT MODE SWITCH
+ * Change this single constant to flip between gateways later.
+ * Supported: "PAY_ON_DESK" | "CASHFREE" | "RAZORPAY"
+ * ============================================================ */
+type PaymentMode = "PAY_ON_DESK" | "CASHFREE" | "RAZORPAY";
+const PAYMENT_MODE: PaymentMode = "PAY_ON_DESK";
+
+// Placeholder for future Razorpay integration
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const initRazorpayPayment = async (_orderData: {
+  amount: number;
+  customer_phone: string;
+  customer_name: string;
+  customer_email: string;
+  booking_id: string;
+}) => {
+  // TODO: Implement Razorpay checkout flow here in the future.
+  throw new Error("Razorpay integration is not implemented yet.");
+};
+
 const STEPS = [
   { icon: Users, label: "Players" },
   { icon: Layers, label: "Section" },
