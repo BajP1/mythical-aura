@@ -19,7 +19,7 @@ interface Booking {
   duration: number;
   phone: string;
   total_price: number;
-  status?: string | null;
+  payment_status?: string | null;
   created_at: string;
 }
 
@@ -166,9 +166,9 @@ const History = () => {
                       {b.time}
                     </div>
                   </div>
-                  {b.status && (
+                  {b.payment_status && (
                     <span className="text-xs glass px-2 py-1 rounded-md uppercase tracking-wider text-brand-orange border border-brand-orange/30">
-                      {b.status}
+                      {b.payment_status}
                     </span>
                   )}
                 </div>
