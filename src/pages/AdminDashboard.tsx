@@ -167,7 +167,24 @@ const AdminDashboard = () => {
   };
 
   const today = todayISO();
-  const todaysCount = bookings.filter((b) => b.date === today).length;
+  const isToday = selectedDateISO === today;
+  const selectedLabel = selectedDate.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const visibleBookings = bookingsForSelected;
+
+  const handleSelectDate = (d?: Date) => {
+    if (!d) return;
+    setSelectedDate(d);
+    setCalendarOpen(false);
+  };
+
+  const showToday = () => {
+    setSelectedDate(new Date());
+    setCalendarOpen(false);
+  };
 
   if (authLoading) {
     return (
@@ -196,7 +213,7 @@ const AdminDashboard = () => {
       <div className="container mx-auto max-w-6xl">
         <ScrollReveal>
           <h1 className="heading-xl text-center mb-4">Admin Dashboard</h1>
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-4 gap-3 flex-wrap">
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -206,11 +223,21 @@ const AdminDashboard = () => {
               <CalendarDays size={16} />
               Calendar
             </motion.button>
+            {!isToday && (
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={showToday}
+                className="glass rounded-xl px-5 py-2.5 font-display text-sm tracking-wider text-primary border border-border hover:border-brand-orange/50 transition-all inline-flex items-center gap-2"
+              >
+                Show Today
+              </motion.button>
+            )}
           </div>
           <p className="subtitle text-center mb-10">
-            Today's Bookings:{" "}
+            Bookings for {isToday ? "Today" : selectedLabel}:{" "}
             <span className="text-brand-orange font-display font-bold">
-              {todaysCount}
+              {visibleBookings.length}
             </span>
           </p>
         </ScrollReveal>
@@ -219,8 +246,10 @@ const AdminDashboard = () => {
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-brand-orange" size={36} />
           </div>
-        ) : bookings.length === 0 ? (
-          <p className="text-center text-muted-foreground">No bookings yet.</p>
+        ) : visibleBookings.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            No bookings for {isToday ? "today" : selectedLabel}.
+          </p>
         ) : (
           <>
             {/* Desktop table */}
@@ -234,7 +263,7 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((b, i) => (
+                  {visibleBookings.map((b, i) => (
                     <motion.tr
                       key={b.id}
                       initial={{ opacity: 0, y: 10 }}
@@ -285,7 +314,7 @@ const AdminDashboard = () => {
 
             {/* Mobile cards */}
             <div className="lg:hidden space-y-4">
-              {bookings.map((b, i) => (
+              {visibleBookings.map((b, i) => (
                 <motion.div
                   key={b.id}
                   initial={{ opacity: 0, y: 16 }}
@@ -348,17 +377,17 @@ const AdminDashboard = () => {
 
       {/* Calendar popup */}
       <Dialog open={calendarOpen} onOpenChange={setCalendarOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass border border-brand-orange/30 shadow-[0_0_40px_-10px_hsl(var(--brand-orange)/0.4)] rounded-2xl">
+        <DialogContent className="max-w-md glass border border-brand-orange/30 shadow-[0_0_40px_-10px_hsl(var(--brand-orange)/0.4)] rounded-2xl">
           <DialogTitle className="font-display text-lg tracking-wider text-brand-orange flex items-center gap-2">
             <CalendarDays size={18} />
-            Bookings Calendar
+            Pick a Date
           </DialogTitle>
 
           <div className="flex flex-col items-center">
             <Calendar
               mode="single"
               selected={selectedDate}
-              onSelect={(d) => d && setSelectedDate(d)}
+              onSelect={handleSelectDate}
               modifiers={{ booked: bookedDates }}
               modifiersClassNames={{
                 booked:
@@ -368,83 +397,13 @@ const AdminDashboard = () => {
             />
           </div>
 
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-display text-sm tracking-wider text-primary">
-                {selectedDate.toLocaleDateString(undefined, {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                })}
-              </h3>
-              <span className="text-xs font-display tracking-wider text-brand-orange bg-brand-orange/10 border border-brand-orange/30 px-2 py-1 rounded-md">
-                {bookingsForSelected.length}{" "}
-                {bookingsForSelected.length === 1 ? "booking" : "bookings"}
-              </span>
-            </div>
-
-            {bookingsForSelected.length === 0 ? (
-              <p className="text-center text-muted-foreground text-sm py-8">
-                No bookings for this date.
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {bookingsForSelected.map((b) => (
-                  <motion.div
-                    key={b.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="glass rounded-xl p-4 border border-border/40 hover:border-brand-orange/40 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2 text-brand-orange font-display text-sm tracking-wider">
-                        <Clock size={14} />
-                        {b.time}
-                      </div>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-md font-display tracking-wider border ${
-                          b.played_status
-                            ? "bg-green-500/10 text-green-400 border-green-500/30"
-                            : "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                        }`}
-                      >
-                        {b.played_status ? "Played" : "Not Played"}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-y-1.5 gap-x-3 text-xs">
-                      <div className="flex items-center gap-2 text-primary">
-                        <Users size={12} className="text-muted-foreground" />
-                        {b.players} {b.players === 1 ? "Player" : "Players"}
-                      </div>
-                      <div className="flex items-center gap-2 text-primary">
-                        <Layers size={12} className="text-muted-foreground" />
-                        Section {String(b.cabin).padStart(2, "0")}
-                      </div>
-                      <div className="flex items-center gap-2 text-primary">
-                        <Timer size={12} className="text-muted-foreground" />
-                        {b.duration} min
-                      </div>
-                      <div className="flex items-center gap-2 text-primary">
-                        <Phone size={12} className="text-muted-foreground" />
-                        {b.phone || "—"}
-                      </div>
-                      <div className="col-span-2 flex items-start gap-2 text-muted-foreground">
-                        <Gamepad2 size={12} className="mt-0.5 shrink-0" />
-                        <span className="truncate">
-                          {Array.isArray(b.games) ? b.games.join(", ") : b.games || "—"}
-                        </span>
-                      </div>
-                      <div className="col-span-2 flex items-center gap-1 text-brand-orange font-display text-base pt-1 border-t border-border/30 mt-1">
-                        <IndianRupee size={14} />
-                        {b.total_price}
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            )}
+          <div className="flex justify-center mt-2">
+            <button
+              onClick={showToday}
+              className="text-xs font-display tracking-wider text-brand-orange hover:underline"
+            >
+              Reset to Today
+            </button>
           </div>
         </DialogContent>
       </Dialog>
