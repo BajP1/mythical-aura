@@ -222,6 +222,33 @@ const BookNow = () => {
   const today = new Date().toISOString().split("T")[0];
   const playerLabel = playerType === "vr" ? "VR Experience" : isCarWheelSelected ? `Car Wheel (${playerType === "carwheel1" ? "1 Player" : "2 Players"})` : `${playerType} ${playerType === 1 ? "Player" : "Players"}`;
 
+  // Parse a "11:00 AM" style label to a 24h hour number
+  const parseSlotHour = (label: string): number => {
+    const m = label.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return 0;
+    let h = parseInt(m[1], 10);
+    const period = m[3].toUpperCase();
+    if (period === "PM" && h !== 12) h += 12;
+    if (period === "AM" && h === 12) h = 0;
+    return h;
+  };
+
+  // Filter time slots: if selected date is today, hide past slots
+  const availableTimes = (() => {
+    if (!date) return TIMES;
+    if (date !== today) return TIMES;
+    const now = new Date();
+    const currentHour = now.getHours();
+    // Show slots strictly after the current hour (e.g. 7:27 PM -> show 8 PM+)
+    return TIMES.filter((t) => parseSlotHour(t) > currentHour);
+  })();
+
+  // Auto-clear time if it becomes invalid after date change
+  if (time && !availableTimes.includes(time)) {
+    // schedule via microtask to avoid setState during render
+    queueMicrotask(() => setTime(""));
+  }
+
   if (!user) {
     return (
       <div className="pt-28 pb-8 section-padding">
