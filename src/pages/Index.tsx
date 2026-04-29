@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Gamepad2, Users, Shield, Sofa, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { Gamepad2, Users, Shield, Sofa, Star, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import { useState } from "react";
 import ScrollReveal from "@/components/ScrollReveal";
 import logo from "@/assets/logo.jpeg";
@@ -78,10 +78,20 @@ const Index = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.7 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link to="/book" className="btn-premium text-lg animate-pulse-glow">
               Book Now
             </Link>
+            <a
+              href="https://www.google.com/maps/place/Mythical+Gaming+Station/@30.3506327,76.38748,17z/data=!4m6!3m5!1s0x391029e87b08843b:0xc54324ef66468fb5!8m2!3d30.3501488!4d76.3903567!16s%2Fg%2F11mt0xwz59"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="glass rounded-xl px-6 py-3 font-display text-sm tracking-wider text-brand-orange border border-brand-orange/40 hover:bg-brand-orange/10 transition-all inline-flex items-center gap-2"
+            >
+              <MapPin size={16} />
+              View Location
+            </a>
           </motion.div>
         </div>
       </section>
