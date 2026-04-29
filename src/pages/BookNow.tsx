@@ -419,15 +419,23 @@ const BookNow = () => {
         return (
           <div>
             <h3 className="heading-md mb-2">Select time</h3>
-            <p className="text-muted-foreground mb-8">Pick a time slot</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
-              {TIMES.map((t) => (
-                <motion.button key={t} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setTime(t)}
-                  className={`card-premium text-center py-3 cursor-pointer ${time === t ? "border-brand-orange glow-orange" : ""}`}>
-                  <span className="font-display text-sm text-primary">{t}</span>
-                </motion.button>
-              ))}
-            </div>
+            <p className="text-muted-foreground mb-8">
+              {date === today ? "Showing slots after current time" : "Pick a time slot"}
+            </p>
+            {availableTimes.length === 0 ? (
+              <p className="text-center text-muted-foreground">
+                No more slots available today. Please choose a future date.
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
+                {availableTimes.map((t) => (
+                  <motion.button key={t} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setTime(t)}
+                    className={`card-premium text-center py-3 cursor-pointer ${time === t ? "border-brand-orange glow-orange" : ""}`}>
+                    <span className="font-display text-sm text-primary">{t}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
           </div>
         );
       case 5:
