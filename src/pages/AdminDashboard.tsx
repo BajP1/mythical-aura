@@ -57,7 +57,42 @@ const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [calendarOpen, setCalendarOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const initialLoadRef = useRef(true);
+
+  // Format Date -> YYYY-MM-DD using local time (matches <input type="date"> values)
+  const toISODate = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  // Set of dates that have at least one booking
+  const bookedDateSet = useMemo(() => {
+    const s = new Set<string>();
+    bookings.forEach((b) => b.date && s.add(b.date));
+    return s;
+  }, [bookings]);
+
+  const bookedDates = useMemo(
+    () =>
+      Array.from(bookedDateSet).map((d) => {
+        const [y, m, day] = d.split("-").map(Number);
+        return new Date(y, m - 1, day);
+      }),
+    [bookedDateSet]
+  );
+
+  const selectedDateISO = toISODate(selectedDate);
+  const bookingsForSelected = useMemo(
+    () =>
+      bookings
+        .filter((b) => b.date === selectedDateISO)
+        .sort((a, b) => (a.time || "").localeCompare(b.time || "")),
+    [bookings, selectedDateISO]
+  );
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
