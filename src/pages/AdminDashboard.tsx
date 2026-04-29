@@ -1,10 +1,13 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldX, Loader2, Check } from "lucide-react";
+import { ShieldX, Loader2, Check, CalendarDays, X, Clock, Users, Layers, Gamepad2, Phone, Timer, IndianRupee } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ScrollReveal from "@/components/ScrollReveal";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
 
 const ADMIN_EMAIL = "mythicalgamingstation@gmail.com";
 
