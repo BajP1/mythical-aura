@@ -184,11 +184,22 @@ const History = () => {
                       {b.time}
                     </div>
                   </div>
-                  {b.payment_status && (
-                    <span className="text-xs glass px-2 py-1 rounded-md uppercase tracking-wider text-brand-orange border border-brand-orange/30">
-                      {b.payment_status}
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-md font-display tracking-wider border ${
+                        b.played_status
+                          ? "bg-green-500/10 text-green-400 border-green-500/30"
+                          : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      }`}
+                    >
+                      {b.played_status ? "Played" : "Not Played"}
                     </span>
-                  )}
+                    {b.payment_status && (
+                      <span className="text-[10px] glass px-2 py-0.5 rounded-md uppercase tracking-wider text-brand-orange border border-brand-orange/30">
+                        {b.payment_status}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2 text-sm">
