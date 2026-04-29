@@ -345,6 +345,109 @@ const AdminDashboard = () => {
           </>
         )}
       </div>
+
+      {/* Calendar popup */}
+      <Dialog open={calendarOpen} onOpenChange={setCalendarOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass border border-brand-orange/30 shadow-[0_0_40px_-10px_hsl(var(--brand-orange)/0.4)] rounded-2xl">
+          <DialogTitle className="font-display text-lg tracking-wider text-brand-orange flex items-center gap-2">
+            <CalendarDays size={18} />
+            Bookings Calendar
+          </DialogTitle>
+
+          <div className="flex flex-col items-center">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={(d) => d && setSelectedDate(d)}
+              modifiers={{ booked: bookedDates }}
+              modifiersClassNames={{
+                booked:
+                  "relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-brand-orange after:shadow-[0_0_6px_hsl(var(--brand-orange))]",
+              }}
+              className={cn("p-3 pointer-events-auto rounded-xl border border-border/40 bg-background/40")}
+            />
+          </div>
+
+          <div className="mt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-display text-sm tracking-wider text-primary">
+                {selectedDate.toLocaleDateString(undefined, {
+                  weekday: "long",
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </h3>
+              <span className="text-xs font-display tracking-wider text-brand-orange bg-brand-orange/10 border border-brand-orange/30 px-2 py-1 rounded-md">
+                {bookingsForSelected.length}{" "}
+                {bookingsForSelected.length === 1 ? "booking" : "bookings"}
+              </span>
+            </div>
+
+            {bookingsForSelected.length === 0 ? (
+              <p className="text-center text-muted-foreground text-sm py-8">
+                No bookings for this date.
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {bookingsForSelected.map((b) => (
+                  <motion.div
+                    key={b.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="glass rounded-xl p-4 border border-border/40 hover:border-brand-orange/40 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 text-brand-orange font-display text-sm tracking-wider">
+                        <Clock size={14} />
+                        {b.time}
+                      </div>
+                      <span
+                        className={`text-[10px] px-2 py-0.5 rounded-md font-display tracking-wider border ${
+                          b.played_status
+                            ? "bg-green-500/10 text-green-400 border-green-500/30"
+                            : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                        }`}
+                      >
+                        {b.played_status ? "Played" : "Not Played"}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-y-1.5 gap-x-3 text-xs">
+                      <div className="flex items-center gap-2 text-primary">
+                        <Users size={12} className="text-muted-foreground" />
+                        {b.players} {b.players === 1 ? "Player" : "Players"}
+                      </div>
+                      <div className="flex items-center gap-2 text-primary">
+                        <Layers size={12} className="text-muted-foreground" />
+                        Section {String(b.cabin).padStart(2, "0")}
+                      </div>
+                      <div className="flex items-center gap-2 text-primary">
+                        <Timer size={12} className="text-muted-foreground" />
+                        {b.duration} min
+                      </div>
+                      <div className="flex items-center gap-2 text-primary">
+                        <Phone size={12} className="text-muted-foreground" />
+                        {b.phone || "—"}
+                      </div>
+                      <div className="col-span-2 flex items-start gap-2 text-muted-foreground">
+                        <Gamepad2 size={12} className="mt-0.5 shrink-0" />
+                        <span className="truncate">
+                          {Array.isArray(b.games) ? b.games.join(", ") : b.games || "—"}
+                        </span>
+                      </div>
+                      <div className="col-span-2 flex items-center gap-1 text-brand-orange font-display text-base pt-1 border-t border-border/30 mt-1">
+                        <IndianRupee size={14} />
+                        {b.total_price}
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
