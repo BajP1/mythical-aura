@@ -195,7 +195,18 @@ const AdminDashboard = () => {
     <div className="pt-28 pb-16 section-padding">
       <div className="container mx-auto max-w-6xl">
         <ScrollReveal>
-          <h1 className="heading-xl text-center mb-2">Admin Dashboard</h1>
+          <h1 className="heading-xl text-center mb-4">Admin Dashboard</h1>
+          <div className="flex justify-center mb-4">
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.96 }}
+              onClick={() => setCalendarOpen(true)}
+              className="glass rounded-xl px-5 py-2.5 font-display text-sm tracking-wider text-brand-orange border border-brand-orange/40 hover:bg-brand-orange/10 transition-all inline-flex items-center gap-2"
+            >
+              <CalendarDays size={16} />
+              Calendar
+            </motion.button>
+          </div>
           <p className="subtitle text-center mb-10">
             Today's Bookings:{" "}
             <span className="text-brand-orange font-display font-bold">
