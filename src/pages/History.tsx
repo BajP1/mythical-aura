@@ -20,6 +20,7 @@ interface Booking {
   phone: string;
   total_price: number;
   payment_status?: string | null;
+  played_status?: boolean | null;
   created_at: string;
 }
 
