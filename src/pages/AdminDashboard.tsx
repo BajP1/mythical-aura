@@ -213,7 +213,7 @@ const AdminDashboard = () => {
       <div className="container mx-auto max-w-6xl">
         <ScrollReveal>
           <h1 className="heading-xl text-center mb-4">Admin Dashboard</h1>
-          <div className="flex justify-center mb-4">
+          <div className="flex justify-center mb-4 gap-3 flex-wrap">
             <motion.button
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
@@ -223,11 +223,21 @@ const AdminDashboard = () => {
               <CalendarDays size={16} />
               Calendar
             </motion.button>
+            {!isToday && (
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={showToday}
+                className="glass rounded-xl px-5 py-2.5 font-display text-sm tracking-wider text-primary border border-border hover:border-brand-orange/50 transition-all inline-flex items-center gap-2"
+              >
+                Show Today
+              </motion.button>
+            )}
           </div>
           <p className="subtitle text-center mb-10">
-            Today's Bookings:{" "}
+            Bookings for {isToday ? "Today" : selectedLabel}:{" "}
             <span className="text-brand-orange font-display font-bold">
-              {todaysCount}
+              {visibleBookings.length}
             </span>
           </p>
         </ScrollReveal>
@@ -236,8 +246,10 @@ const AdminDashboard = () => {
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-brand-orange" size={36} />
           </div>
-        ) : bookings.length === 0 ? (
-          <p className="text-center text-muted-foreground">No bookings yet.</p>
+        ) : visibleBookings.length === 0 ? (
+          <p className="text-center text-muted-foreground">
+            No bookings for {isToday ? "today" : selectedLabel}.
+          </p>
         ) : (
           <>
             {/* Desktop table */}
@@ -251,7 +263,7 @@ const AdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {bookings.map((b, i) => (
+                  {visibleBookings.map((b, i) => (
                     <motion.tr
                       key={b.id}
                       initial={{ opacity: 0, y: 10 }}
