@@ -167,7 +167,24 @@ const AdminDashboard = () => {
   };
 
   const today = todayISO();
-  const todaysCount = bookings.filter((b) => b.date === today).length;
+  const isToday = selectedDateISO === today;
+  const selectedLabel = selectedDate.toLocaleDateString(undefined, {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const visibleBookings = bookingsForSelected;
+
+  const handleSelectDate = (d?: Date) => {
+    if (!d) return;
+    setSelectedDate(d);
+    setCalendarOpen(false);
+  };
+
+  const showToday = () => {
+    setSelectedDate(new Date());
+    setCalendarOpen(false);
+  };
 
   if (authLoading) {
     return (
