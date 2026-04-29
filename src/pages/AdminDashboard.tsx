@@ -314,7 +314,7 @@ const AdminDashboard = () => {
 
             {/* Mobile cards */}
             <div className="lg:hidden space-y-4">
-              {bookings.map((b, i) => (
+              {visibleBookings.map((b, i) => (
                 <motion.div
                   key={b.id}
                   initial={{ opacity: 0, y: 16 }}
