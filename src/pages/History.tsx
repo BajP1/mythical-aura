@@ -66,6 +66,23 @@ const History = () => {
       setLoading(false);
     };
     fetchBookings();
+
+    // Realtime: reflect admin updates (e.g. played_status) instantly
+    const channel = supabase
+      .channel(`history-bookings-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const updated = payload.new as Booking;
+          setBookings((prev) => prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const handleCopy = (b: Booking) => {
