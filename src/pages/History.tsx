@@ -20,6 +20,7 @@ interface Booking {
   phone: string;
   total_price: number;
   payment_status?: string | null;
+  played_status?: boolean | null;
   created_at: string;
 }
 
@@ -65,6 +66,23 @@ const History = () => {
       setLoading(false);
     };
     fetchBookings();
+
+    // Realtime: reflect admin updates (e.g. played_status) instantly
+    const channel = supabase
+      .channel(`history-bookings-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "bookings", filter: `user_id=eq.${user.id}` },
+        (payload) => {
+          const updated = payload.new as Booking;
+          setBookings((prev) => prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b)));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const handleCopy = (b: Booking) => {
@@ -166,11 +184,22 @@ const History = () => {
                       {b.time}
                     </div>
                   </div>
-                  {b.payment_status && (
-                    <span className="text-xs glass px-2 py-1 rounded-md uppercase tracking-wider text-brand-orange border border-brand-orange/30">
-                      {b.payment_status}
+                  <div className="flex flex-col items-end gap-1">
+                    <span
+                      className={`text-xs px-2 py-1 rounded-md font-display tracking-wider border ${
+                        b.played_status
+                          ? "bg-green-500/10 text-green-400 border-green-500/30"
+                          : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                      }`}
+                    >
+                      {b.played_status ? "Played" : "Not Played"}
                     </span>
-                  )}
+                    {b.payment_status && (
+                      <span className="text-[10px] glass px-2 py-0.5 rounded-md uppercase tracking-wider text-brand-orange border border-brand-orange/30">
+                        {b.payment_status}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2 text-sm">

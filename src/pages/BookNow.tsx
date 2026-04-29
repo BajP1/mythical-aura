@@ -222,6 +222,33 @@ const BookNow = () => {
   const today = new Date().toISOString().split("T")[0];
   const playerLabel = playerType === "vr" ? "VR Experience" : isCarWheelSelected ? `Car Wheel (${playerType === "carwheel1" ? "1 Player" : "2 Players"})` : `${playerType} ${playerType === 1 ? "Player" : "Players"}`;
 
+  // Parse a "11:00 AM" style label to a 24h hour number
+  const parseSlotHour = (label: string): number => {
+    const m = label.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return 0;
+    let h = parseInt(m[1], 10);
+    const period = m[3].toUpperCase();
+    if (period === "PM" && h !== 12) h += 12;
+    if (period === "AM" && h === 12) h = 0;
+    return h;
+  };
+
+  // Filter time slots: if selected date is today, hide past slots
+  const availableTimes = (() => {
+    if (!date) return TIMES;
+    if (date !== today) return TIMES;
+    const now = new Date();
+    const currentHour = now.getHours();
+    // Show slots strictly after the current hour (e.g. 7:27 PM -> show 8 PM+)
+    return TIMES.filter((t) => parseSlotHour(t) > currentHour);
+  })();
+
+  // Auto-clear time if it becomes invalid after date change
+  if (time && !availableTimes.includes(time)) {
+    // schedule via microtask to avoid setState during render
+    queueMicrotask(() => setTime(""));
+  }
+
   if (!user) {
     return (
       <div className="pt-28 pb-8 section-padding">
@@ -392,15 +419,23 @@ const BookNow = () => {
         return (
           <div>
             <h3 className="heading-md mb-2">Select time</h3>
-            <p className="text-muted-foreground mb-8">Pick a time slot</p>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
-              {TIMES.map((t) => (
-                <motion.button key={t} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setTime(t)}
-                  className={`card-premium text-center py-3 cursor-pointer ${time === t ? "border-brand-orange glow-orange" : ""}`}>
-                  <span className="font-display text-sm text-primary">{t}</span>
-                </motion.button>
-              ))}
-            </div>
+            <p className="text-muted-foreground mb-8">
+              {date === today ? "Showing slots after current time" : "Pick a time slot"}
+            </p>
+            {availableTimes.length === 0 ? (
+              <p className="text-center text-muted-foreground">
+                No more slots available today. Please choose a future date.
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
+                {availableTimes.map((t) => (
+                  <motion.button key={t} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setTime(t)}
+                    className={`card-premium text-center py-3 cursor-pointer ${time === t ? "border-brand-orange glow-orange" : ""}`}>
+                    <span className="font-display text-sm text-primary">{t}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
           </div>
         );
       case 5:
