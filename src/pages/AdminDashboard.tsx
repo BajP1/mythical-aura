@@ -289,7 +289,17 @@ const AdminDashboard = () => {
                       <td className="py-3 px-3 text-sm text-muted-foreground">{b.email}</td>
                       <td className="py-3 px-3 text-sm text-primary text-center">{b.players}</td>
                       <td className="py-3 px-3 text-sm text-primary text-center">Section {String(b.cabin).padStart(2, "0")}</td>
-                      <td className="py-3 px-3 text-xs text-muted-foreground max-w-[160px] truncate">{Array.isArray(b.games) ? b.games.join(", ") : b.games}</td>
+                      <td className="py-3 px-3 text-xs text-muted-foreground align-top whitespace-normal break-words min-w-[160px]">
+                        {Array.isArray(b.games) ? (
+                          <ul className="space-y-0.5 list-none">
+                            {b.games.map((g, idx) => (
+                              <li key={idx} className="leading-snug">{g}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span className="leading-snug">{b.games}</span>
+                        )}
+                      </td>
                       <td className="py-3 px-3 text-sm text-primary">{b.date}</td>
                       <td className="py-3 px-3 text-sm text-primary">{b.time}</td>
                       <td className="py-3 px-3 text-sm text-primary text-center">{b.duration} min</td>
@@ -344,7 +354,6 @@ const AdminDashboard = () => {
                       ["Email", b.email],
                       ["Players", String(b.players)],
                       ["Section", `Section ${String(b.cabin).padStart(2, "0")}`],
-                      ["Games", Array.isArray(b.games) ? b.games.join(", ") : b.games],
                       ["Date", b.date],
                       ["Time", b.time],
                       ["Duration", `${b.duration} min`],
@@ -355,6 +364,20 @@ const AdminDashboard = () => {
                         <span className="text-primary text-xs font-semibold">{v}</span>
                       </div>
                     ))}
+                    <div className="flex justify-between items-start border-b border-border/20 pb-1 gap-3">
+                      <span className="text-muted-foreground text-xs shrink-0">Games</span>
+                      <div className="text-primary text-xs font-semibold text-right whitespace-normal break-words">
+                        {Array.isArray(b.games) ? (
+                          <ul className="space-y-0.5 list-none">
+                            {b.games.map((g, idx) => (
+                              <li key={idx}>{g}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span>{b.games}</span>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex justify-between pt-1">
                       <span className="text-muted-foreground text-xs">Status</span>
                       <span

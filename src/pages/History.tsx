@@ -213,7 +213,15 @@ const History = () => {
                   </div>
                   <div className="flex items-start gap-2 text-primary">
                     <Gamepad2 size={14} className="text-muted-foreground mt-0.5 shrink-0" />
-                    <span className="text-muted-foreground">{b.games?.join(", ") || "-"}</span>
+                    {Array.isArray(b.games) && b.games.length > 0 ? (
+                      <ul className="text-muted-foreground space-y-0.5 list-none break-words">
+                        {b.games.map((g, idx) => (
+                          <li key={idx} className="leading-snug">{g}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 text-primary">
                     <Timer size={14} className="text-muted-foreground" />
