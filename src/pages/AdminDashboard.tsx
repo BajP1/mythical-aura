@@ -68,7 +68,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const initialLoadRef = useRef(true);
+  const bookingIdsRef = useRef<Set<string>>(new Set());
+  const hasLoadedBookingsRef = useRef(false);
 
   // Format Date -> YYYY-MM-DD using local time (matches <input type="date"> values)
   const toISODate = (d: Date) => {
@@ -107,53 +108,48 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     if (!isAdmin) return;
+    let isMounted = true;
 
-    const fetchBookings = async () => {
+    const fetchBookings = async (notifyNew = false) => {
       const { data, error } = await supabase
         .from("bookings")
         .select("*")
         .order("created_at", { ascending: false });
-      if (!error && data) setBookings(data as Booking[]);
-      else if (error) console.error("Bookings fetch error:", error);
-      setLoading(false);
-      initialLoadRef.current = false;
-    };
-    fetchBookings();
+      if (!isMounted) return;
 
-    // Realtime subscription — stays active for the session
-    const channel = supabase
-      .channel("bookings-live")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "bookings" },
-        (payload) => {
-          console.log("New booking received:", payload);
-          const newBooking = payload.new as Booking;
-          setBookings((prev) => {
-            if (prev.some((b) => b.id === newBooking.id)) return prev;
-            return [newBooking, ...prev];
-          });
-          playNotificationSound();
-          toast.success(`New booking: ${newBooking.name}`);
-        }
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "bookings" },
-        (payload) => {
-          console.log("Booking updated:", payload);
-          const updated = payload.new as Booking;
-          setBookings((prev) =>
-            prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b))
-          );
-        }
-      )
-      .subscribe((status) => {
-        console.log("Realtime channel status:", status);
-      });
+      if (error) {
+        console.error("Bookings fetch error:", error);
+        setLoading(false);
+        return;
+      }
+
+      const latestBookings = (data || []) as Booking[];
+      const previousIds = bookingIdsRef.current;
+      const newBookings = latestBookings.filter((b) => !previousIds.has(b.id));
+
+      setBookings(latestBookings);
+      bookingIdsRef.current = new Set(latestBookings.map((b) => b.id));
+      setLoading(false);
+
+      if (notifyNew && hasLoadedBookingsRef.current && newBookings.length > 0) {
+        console.log("New booking detected by auto refresh:", newBookings);
+        playNotificationSound();
+        toast.success(
+          newBookings.length === 1
+            ? `New booking: ${newBookings[0].name}`
+            : `${newBookings.length} new bookings received`
+        );
+      }
+
+      hasLoadedBookingsRef.current = true;
+    };
+
+    fetchBookings(false);
+    const intervalId = window.setInterval(() => fetchBookings(true), 3000);
 
     return () => {
-      supabase.removeChannel(channel);
+      isMounted = false;
+      window.clearInterval(intervalId);
     };
   }, [isAdmin]);
 
