@@ -27,8 +27,8 @@ interface Booking {
   created_at: string;
 }
 
-// Short notification beep using WebAudio (no external file needed)
-const playNotificationSound = () => {
+// Notification sound: try mp3 first, fallback to WebAudio beep
+const playBeepFallback = () => {
   try {
     const AudioCtx =
       (window as any).AudioContext || (window as any).webkitAudioContext;
@@ -48,6 +48,15 @@ const playNotificationSound = () => {
     o.stop(ctx.currentTime + 0.42);
   } catch {
     /* ignore */
+  }
+};
+
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio("/notification.mp3");
+    audio.play().catch(() => playBeepFallback());
+  } catch {
+    playBeepFallback();
   }
 };
 
@@ -111,35 +120,37 @@ const AdminDashboard = () => {
     };
     fetchBookings();
 
-    // Realtime subscription
+    // Realtime subscription — stays active for the session
     const channel = supabase
-      .channel("admin-bookings-realtime")
+      .channel("bookings-live")
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "bookings" },
         (payload) => {
+          console.log("New booking received:", payload);
           const newBooking = payload.new as Booking;
           setBookings((prev) => {
             if (prev.some((b) => b.id === newBooking.id)) return prev;
             return [newBooking, ...prev];
           });
-          if (!initialLoadRef.current) {
-            playNotificationSound();
-            toast.success(`New booking: ${newBooking.name}`);
-          }
+          playNotificationSound();
+          toast.success(`New booking: ${newBooking.name}`);
         }
       )
       .on(
         "postgres_changes",
         { event: "UPDATE", schema: "public", table: "bookings" },
         (payload) => {
+          console.log("Booking updated:", payload);
           const updated = payload.new as Booking;
           setBookings((prev) =>
             prev.map((b) => (b.id === updated.id ? { ...b, ...updated } : b))
           );
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log("Realtime channel status:", status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
