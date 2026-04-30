@@ -39,7 +39,8 @@ const STEPS = [
   { icon: CreditCard, label: "Summary" },
 ];
 
-const TIMES = ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM", "9:00 PM"];
+const TIMES = ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"];
+const CLOSING_HOUR_24 = 21; // 9 PM
 
 const HOUR_OPTIONS = [0, 1, 2, 3, 4, 5];
 const MINUTE_OPTIONS = [0, 30];
