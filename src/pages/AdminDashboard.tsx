@@ -354,7 +354,6 @@ const AdminDashboard = () => {
                       ["Email", b.email],
                       ["Players", String(b.players)],
                       ["Section", `Section ${String(b.cabin).padStart(2, "0")}`],
-                      ["Games", Array.isArray(b.games) ? b.games.join(", ") : b.games],
                       ["Date", b.date],
                       ["Time", b.time],
                       ["Duration", `${b.duration} min`],
@@ -365,6 +364,20 @@ const AdminDashboard = () => {
                         <span className="text-primary text-xs font-semibold">{v}</span>
                       </div>
                     ))}
+                    <div className="flex justify-between items-start border-b border-border/20 pb-1 gap-3">
+                      <span className="text-muted-foreground text-xs shrink-0">Games</span>
+                      <div className="text-primary text-xs font-semibold text-right whitespace-normal break-words">
+                        {Array.isArray(b.games) ? (
+                          <ul className="space-y-0.5 list-none">
+                            {b.games.map((g, idx) => (
+                              <li key={idx}>{g}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <span>{b.games}</span>
+                        )}
+                      </div>
+                    </div>
                     <div className="flex justify-between pt-1">
                       <span className="text-muted-foreground text-xs">Status</span>
                       <span
