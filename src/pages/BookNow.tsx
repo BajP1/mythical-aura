@@ -234,20 +234,32 @@ const BookNow = () => {
     return h;
   };
 
-  // Filter time slots: if selected date is today, hide past slots
+  // Filter time slots: today requires at least 2-hour gap from now
   const availableTimes = (() => {
     if (!date) return TIMES;
     if (date !== today) return TIMES;
     const now = new Date();
-    const currentHour = now.getHours();
-    // Show slots strictly after the current hour (e.g. 7:27 PM -> show 8 PM+)
-    return TIMES.filter((t) => parseSlotHour(t) > currentHour);
+    // minutes since midnight + 120-min lead time
+    const thresholdMinutes = now.getHours() * 60 + now.getMinutes() + 120;
+    return TIMES.filter((t) => parseSlotHour(t) * 60 >= thresholdMinutes);
   })();
 
   // Auto-clear time if it becomes invalid after date change
   if (time && !availableTimes.includes(time)) {
-    // schedule via microtask to avoid setState during render
     queueMicrotask(() => setTime(""));
+  }
+
+  // Max duration in minutes based on selected time and closing hour
+  const maxDurationMinutes = time ? Math.max(0, (CLOSING_HOUR_24 - parseSlotHour(time)) * 60) : 5 * 60 + 30;
+
+  // Auto-clamp duration if it exceeds the max once a time is picked
+  if (time && totalDuration > maxDurationMinutes) {
+    queueMicrotask(() => {
+      const h = Math.floor(maxDurationMinutes / 60);
+      const m = maxDurationMinutes % 60;
+      setDurationHours(h);
+      setDurationMinutes(m === 0 ? 0 : 30);
+    });
   }
 
   if (!user) {
