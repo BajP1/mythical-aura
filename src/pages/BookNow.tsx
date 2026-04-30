@@ -460,18 +460,25 @@ const BookNow = () => {
               <div>
                 <p className="text-muted-foreground text-sm mb-4 font-display tracking-wider">Hours</p>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                  {HOUR_OPTIONS.map((h) => (
-                    <motion.button key={h} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                      onClick={() => {
-                        setDurationHours(h);
-                        // If 0 hours and 0 minutes, auto-set minutes to 30
-                        if (h === 0 && durationMinutes === 0) setDurationMinutes(30);
-                      }}
-                      className={`card-premium text-center py-4 cursor-pointer ${durationHours === h ? "border-brand-orange glow-orange" : ""}`}>
-                      <span className="font-display text-2xl font-bold text-primary">{h}</span>
-                      <span className="block text-muted-foreground text-xs mt-1">{h === 1 ? "Hour" : "Hours"}</span>
-                    </motion.button>
-                  ))}
+                  {HOUR_OPTIONS.map((h) => {
+                    // Disabled when even h:00 exceeds max (i.e. h*60 > maxDurationMinutes)
+                    const disabled = h * 60 > maxDurationMinutes;
+                    return (
+                      <motion.button key={h} whileHover={disabled ? {} : { scale: 1.05 }} whileTap={disabled ? {} : { scale: 0.95 }}
+                        onClick={() => {
+                          if (disabled) return;
+                          setDurationHours(h);
+                          // If 0 hours and 0 minutes, auto-set minutes to 30
+                          if (h === 0 && durationMinutes === 0) setDurationMinutes(30);
+                          // If h:30 would exceed max, force minutes to 0
+                          if (h * 60 + 30 > maxDurationMinutes) setDurationMinutes(0);
+                        }}
+                        className={`card-premium text-center py-4 cursor-pointer ${durationHours === h ? "border-brand-orange glow-orange" : ""} ${disabled ? "opacity-30 cursor-not-allowed" : ""}`}>
+                        <span className="font-display text-2xl font-bold text-primary">{h}</span>
+                        <span className="block text-muted-foreground text-xs mt-1">{h === 1 ? "Hour" : "Hours"}</span>
+                      </motion.button>
+                    );
+                  })}
                 </div>
               </div>
               <div>
@@ -479,7 +486,9 @@ const BookNow = () => {
                 <div className="grid grid-cols-2 gap-3 max-w-xs mx-auto">
                   {MINUTE_OPTIONS.map((m) => {
                     // Disable 00 minutes if 0 hours (would result in 0 total)
-                    const disabled = durationHours === 0 && m === 0;
+                    // Disable if total exceeds max remaining time
+                    const total = durationHours * 60 + m;
+                    const disabled = (durationHours === 0 && m === 0) || total > maxDurationMinutes;
                     return (
                       <motion.button key={m} whileHover={disabled ? {} : { scale: 1.05 }} whileTap={disabled ? {} : { scale: 0.95 }}
                         onClick={() => !disabled && setDurationMinutes(m)}
@@ -495,6 +504,11 @@ const BookNow = () => {
                 <p className="text-muted-foreground text-xs mb-1">Selected Duration & Price</p>
                 <p className="font-display text-2xl font-bold text-primary">{durationLabel}</p>
                 <p className="font-display text-xl font-bold text-brand-orange mt-1">₹{price}</p>
+                {time && (
+                  <p className="text-[11px] text-muted-foreground mt-2">
+                    Max allowed from {time}: {Math.floor(maxDurationMinutes / 60)}h {maxDurationMinutes % 60}m (closes 9 PM)
+                  </p>
+                )}
               </div>
             </div>
           </div>
