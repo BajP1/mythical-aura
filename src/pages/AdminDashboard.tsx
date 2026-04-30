@@ -252,78 +252,8 @@ const AdminDashboard = () => {
           </p>
         ) : (
           <>
-            {/* Desktop table */}
-            <div className="hidden lg:block overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-border/50">
-                    {["✓", "Entry #", "Name", "Email", "Players", "Section", "Games", "Date", "Time", "Duration", "Phone", "Total", "Status"].map((h) => (
-                      <th key={h} className="py-3 px-3 font-display text-xs tracking-widest uppercase text-muted-foreground">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleBookings.map((b, i) => (
-                    <motion.tr
-                      key={b.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: Math.min(i * 0.02, 0.3) }}
-                      className={`border-b border-border/20 hover:bg-brand-orange/5 transition-colors ${b.played_status ? "opacity-70" : ""}`}
-                    >
-                      <td className="py-3 px-3">
-                        <button
-                          onClick={() => togglePlayed(b)}
-                          className={`w-6 h-6 rounded-md border flex items-center justify-center transition-all ${
-                            b.played_status
-                              ? "bg-green-500/20 border-green-500"
-                              : "border-border hover:border-brand-orange"
-                          }`}
-                          title={b.played_status ? "Mark as not played" : "Mark as played"}
-                        >
-                          {b.played_status && <Check size={14} className="text-green-400" />}
-                        </button>
-                      </td>
-                      <td className="py-3 px-3 font-display text-xs font-bold text-brand-orange">{b.id.slice(0, 8).toUpperCase()}</td>
-                      <td className="py-3 px-3 text-sm text-primary">{b.name}</td>
-                      <td className="py-3 px-3 text-sm text-muted-foreground">{b.email}</td>
-                      <td className="py-3 px-3 text-sm text-primary text-center">{b.players}</td>
-                      <td className="py-3 px-3 text-sm text-primary text-center">Section {String(b.cabin).padStart(2, "0")}</td>
-                      <td className="py-3 px-3 text-xs text-muted-foreground align-top whitespace-normal break-words min-w-[160px]">
-                        {Array.isArray(b.games) ? (
-                          <ul className="space-y-0.5 list-none">
-                            {b.games.map((g, idx) => (
-                              <li key={idx} className="leading-snug">{g}</li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <span className="leading-snug">{b.games}</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-3 text-sm text-primary">{b.date}</td>
-                      <td className="py-3 px-3 text-sm text-primary">{b.time}</td>
-                      <td className="py-3 px-3 text-sm text-primary text-center">{b.duration} min</td>
-                      <td className="py-3 px-3 text-sm text-primary">{b.phone || "—"}</td>
-                      <td className="py-3 px-3 font-display text-sm font-bold text-brand-orange">₹{b.total_price}</td>
-                      <td className="py-3 px-3">
-                        <span
-                          className={`text-xs px-2 py-1 rounded-md font-display tracking-wider border ${
-                            b.played_status
-                              ? "bg-green-500/10 text-green-400 border-green-500/30"
-                              : "bg-amber-500/10 text-amber-400 border-amber-500/30"
-                          }`}
-                        >
-                          {b.played_status ? "Played" : "Not Played"}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Mobile cards */}
-            <div className="lg:hidden space-y-4">
+            {/* Unified card grid (mobile + desktop) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {visibleBookings.map((b, i) => (
                 <motion.div
                   key={b.id}
