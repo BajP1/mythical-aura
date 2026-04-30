@@ -437,7 +437,7 @@ const BookNow = () => {
             </p>
             {availableTimes.length === 0 ? (
               <p className="text-center text-muted-foreground">
-                No more slots available today. Please choose a future date.
+                No slots available for today
               </p>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-w-lg mx-auto">
