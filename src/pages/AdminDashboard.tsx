@@ -75,6 +75,8 @@ const AdminDashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const bookingIdsRef = useRef<Set<string>>(new Set());
   const hasLoadedBookingsRef = useRef(false);
+  const [blockedSlots, setBlockedSlots] = useState<{ id: string; date: string; time: string }[]>([]);
+  const [blockingSlot, setBlockingSlot] = useState<string | null>(null);
 
   // Format Date -> YYYY-MM-DD using local time (matches <input type="date"> values)
   const toISODate = (d: Date) => {
