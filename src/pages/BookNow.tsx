@@ -79,6 +79,47 @@ const BookNow = () => {
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [blockedTimes, setBlockedTimes] = useState<string[]>([]);
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+
+  // Fetch blocked slots + already-booked slots whenever the date changes
+  useEffect(() => {
+    if (!date) {
+      setBlockedTimes([]);
+      setBookedTimes([]);
+      return;
+    }
+    let active = true;
+    const load = async () => {
+      const [blockedRes, bookingsRes] = await Promise.all([
+        supabase.from("blocked_slots").select("time").eq("date", date),
+        supabase.from("bookings").select("time").eq("date", date),
+      ]);
+      if (!active) return;
+      setBlockedTimes(((blockedRes.data as any[]) || []).map((r) => r.time));
+      setBookedTimes(((bookingsRes.data as any[]) || []).map((r) => r.time));
+    };
+    load();
+
+    const channel = supabase
+      .channel(`booknow-blocked-${date}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blocked_slots", filter: `date=eq.${date}` },
+        () => load()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings", filter: `date=eq.${date}` },
+        () => load()
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [date]);
 
   const isCarWheelSelected = playerType !== null && isCarWheel(playerType);
 
