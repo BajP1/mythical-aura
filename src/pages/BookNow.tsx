@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Layers, Gamepad2, Calendar as CalendarIcon, Clock, Timer, Phone, CreditCard, ChevronLeft, ChevronRight, Check, LogIn, Glasses, CircleDot } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -79,6 +79,47 @@ const BookNow = () => {
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [blockedTimes, setBlockedTimes] = useState<string[]>([]);
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+
+  // Fetch blocked slots + already-booked slots whenever the date changes
+  useEffect(() => {
+    if (!date) {
+      setBlockedTimes([]);
+      setBookedTimes([]);
+      return;
+    }
+    let active = true;
+    const load = async () => {
+      const [blockedRes, bookingsRes] = await Promise.all([
+        supabase.from("blocked_slots").select("time").eq("date", date),
+        supabase.from("bookings").select("time").eq("date", date),
+      ]);
+      if (!active) return;
+      setBlockedTimes(((blockedRes.data as any[]) || []).map((r) => r.time));
+      setBookedTimes(((bookingsRes.data as any[]) || []).map((r) => r.time));
+    };
+    load();
+
+    const channel = supabase
+      .channel(`booknow-blocked-${date}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blocked_slots", filter: `date=eq.${date}` },
+        () => load()
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "bookings", filter: `date=eq.${date}` },
+        () => load()
+      )
+      .subscribe();
+
+    return () => {
+      active = false;
+      supabase.removeChannel(channel);
+    };
+  }, [date]);
 
   const isCarWheelSelected = playerType !== null && isCarWheel(playerType);
 
@@ -131,6 +172,19 @@ const BookNow = () => {
 
   const handleConfirmBooking = async () => {
     if (!user) return;
+
+    // Final conflict check before insert
+    const { data: blockedCheck } = await supabase
+      .from("blocked_slots")
+      .select("id")
+      .eq("date", date)
+      .eq("time", time)
+      .maybeSingle();
+    if (blockedCheck) {
+      toast.error("This time slot is not available");
+      return;
+    }
+
     setSaving(true);
     try {
       const playersNum = playerType === "vr" ? 1 : isCarWheelSelected ? (playerType === "carwheel1" ? 1 : 2) : playerType!;
@@ -234,14 +288,16 @@ const BookNow = () => {
     return h;
   };
 
-  // Filter time slots: today requires at least 2-hour gap from now
+  // Filter time slots: today requires at least 2-hour gap from now;
+  // also remove admin-blocked and already-booked slots
   const availableTimes = (() => {
-    if (!date) return TIMES;
-    if (date !== today) return TIMES;
-    const now = new Date();
-    // minutes since midnight + 120-min lead time
-    const thresholdMinutes = now.getHours() * 60 + now.getMinutes() + 120;
-    return TIMES.filter((t) => parseSlotHour(t) * 60 >= thresholdMinutes);
+    let base = TIMES;
+    if (date === today) {
+      const now = new Date();
+      const thresholdMinutes = now.getHours() * 60 + now.getMinutes() + 120;
+      base = base.filter((t) => parseSlotHour(t) * 60 >= thresholdMinutes);
+    }
+    return base.filter((t) => !blockedTimes.includes(t) && !bookedTimes.includes(t));
   })();
 
   // Auto-clear time if it becomes invalid after date change

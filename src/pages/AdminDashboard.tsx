@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldX, Loader2, Check, CalendarDays, Clock, Users, Layers, Gamepad2, Phone, Timer, IndianRupee } from "lucide-react";
+import { ShieldX, Loader2, Check, CalendarDays, Clock, Users, Layers, Gamepad2, Phone, Timer, IndianRupee, Lock, Unlock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ScrollReveal from "@/components/ScrollReveal";
@@ -62,6 +62,11 @@ const playNotificationSound = () => {
 
 const todayISO = () => new Date().toISOString().split("T")[0];
 
+const TIME_SLOTS = [
+  "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM",
+  "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM",
+];
+
 const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -70,6 +75,8 @@ const AdminDashboard = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const bookingIdsRef = useRef<Set<string>>(new Set());
   const hasLoadedBookingsRef = useRef(false);
+  const [blockedSlots, setBlockedSlots] = useState<{ id: string; date: string; time: string }[]>([]);
+  const [blockingSlot, setBlockingSlot] = useState<string | null>(null);
 
   // Format Date -> YYYY-MM-DD using local time (matches <input type="date"> values)
   const toISODate = (d: Date) => {
@@ -152,6 +159,76 @@ const AdminDashboard = () => {
       window.clearInterval(intervalId);
     };
   }, [isAdmin]);
+
+  // Fetch blocked slots for currently selected date + realtime updates
+  useEffect(() => {
+    if (!isAdmin) return;
+    let mounted = true;
+    const fetchBlocked = async () => {
+      const { data, error } = await supabase
+        .from("blocked_slots")
+        .select("*")
+        .eq("date", selectedDateISO);
+      if (!mounted) return;
+      if (error) {
+        console.error("blocked_slots fetch error:", error);
+        return;
+      }
+      setBlockedSlots((data || []) as any);
+    };
+    fetchBlocked();
+
+    const channel = supabase
+      .channel(`blocked-slots-${selectedDateISO}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blocked_slots", filter: `date=eq.${selectedDateISO}` },
+        () => fetchBlocked()
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, selectedDateISO]);
+
+  const isSlotBlocked = (time: string) =>
+    blockedSlots.some((s) => s.time === time);
+
+  const isSlotBooked = (time: string) =>
+    bookingsForSelected.some((b) => b.time === time);
+
+  const toggleBlockSlot = async (time: string) => {
+    if (blockingSlot) return;
+    setBlockingSlot(time);
+    const existing = blockedSlots.find((s) => s.time === time);
+    try {
+      if (existing) {
+        const { error } = await supabase
+          .from("blocked_slots")
+          .delete()
+          .eq("id", existing.id);
+        if (error) throw error;
+        setBlockedSlots((prev) => prev.filter((s) => s.id !== existing.id));
+        toast.success(`Unblocked ${time}`);
+      } else {
+        const { data, error } = await supabase
+          .from("blocked_slots")
+          .insert({ date: selectedDateISO, time })
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) setBlockedSlots((prev) => [...prev, data as any]);
+        toast.success(`Blocked ${time}`);
+      }
+    } catch (err: any) {
+      console.error("Block toggle failed:", err);
+      toast.error(err?.message || "Failed to update slot");
+    } finally {
+      setBlockingSlot(null);
+    }
+  };
 
   const togglePlayed = async (b: Booking) => {
     const next = !b.played_status;
@@ -247,6 +324,52 @@ const AdminDashboard = () => {
               {visibleBookings.length}
             </span>
           </p>
+        </ScrollReveal>
+
+        {/* Offline Slot Blocking */}
+        <ScrollReveal>
+          <div className="card-premium mb-8">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Lock size={16} className="text-brand-orange" />
+                <h3 className="font-display text-sm tracking-widest text-primary">
+                  Block Slots — {isToday ? "Today" : selectedLabel}
+                </h3>
+              </div>
+              <span className="text-[11px] text-muted-foreground">
+                Tap a slot to block / unblock for online bookings
+              </span>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {TIME_SLOTS.map((t) => {
+                const blocked = isSlotBlocked(t);
+                const booked = isSlotBooked(t);
+                const busy = blockingSlot === t;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => toggleBlockSlot(t)}
+                    disabled={busy}
+                    className={`relative rounded-lg border px-2 py-2 text-xs font-display tracking-wider transition-all ${
+                      blocked
+                        ? "border-red-500/60 bg-red-500/15 text-red-300"
+                        : booked
+                        ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                        : "border-border bg-background/40 text-primary hover:border-brand-orange/50"
+                    } ${busy ? "opacity-50" : ""}`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {blocked ? <Lock size={11} /> : booked ? <Check size={11} /> : <Unlock size={11} />}
+                      <span>{t}</span>
+                    </div>
+                    <span className={`block mt-1 text-[10px] ${blocked ? "text-red-400" : booked ? "text-amber-400" : "text-muted-foreground"}`}>
+                      {blocked ? "Blocked" : booked ? "Booked" : "Open"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </ScrollReveal>
 
         {loading ? (
