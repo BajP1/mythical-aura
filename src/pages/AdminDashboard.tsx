@@ -326,6 +326,52 @@ const AdminDashboard = () => {
           </p>
         </ScrollReveal>
 
+        {/* Offline Slot Blocking */}
+        <ScrollReveal>
+          <div className="card-premium mb-8">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Lock size={16} className="text-brand-orange" />
+                <h3 className="font-display text-sm tracking-widest text-primary">
+                  Block Slots — {isToday ? "Today" : selectedLabel}
+                </h3>
+              </div>
+              <span className="text-[11px] text-muted-foreground">
+                Tap a slot to block / unblock for online bookings
+              </span>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+              {TIME_SLOTS.map((t) => {
+                const blocked = isSlotBlocked(t);
+                const booked = isSlotBooked(t);
+                const busy = blockingSlot === t;
+                return (
+                  <button
+                    key={t}
+                    onClick={() => toggleBlockSlot(t)}
+                    disabled={busy}
+                    className={`relative rounded-lg border px-2 py-2 text-xs font-display tracking-wider transition-all ${
+                      blocked
+                        ? "border-red-500/60 bg-red-500/15 text-red-300"
+                        : booked
+                        ? "border-amber-500/40 bg-amber-500/10 text-amber-300"
+                        : "border-border bg-background/40 text-primary hover:border-brand-orange/50"
+                    } ${busy ? "opacity-50" : ""}`}
+                  >
+                    <div className="flex items-center justify-center gap-1">
+                      {blocked ? <Lock size={11} /> : booked ? <Check size={11} /> : <Unlock size={11} />}
+                      <span>{t}</span>
+                    </div>
+                    <span className={`block mt-1 text-[10px] ${blocked ? "text-red-400" : booked ? "text-amber-400" : "text-muted-foreground"}`}>
+                      {blocked ? "Blocked" : booked ? "Booked" : "Open"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </ScrollReveal>
+
         {loading ? (
           <div className="flex justify-center py-20">
             <Loader2 className="animate-spin text-brand-orange" size={36} />
