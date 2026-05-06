@@ -14,7 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blocked_slots: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          time: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          time: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          time?: string
+        }
+        Relationships: []
+      }
+      bookings: {
+        Row: {
+          cabin: number
+          created_at: string
+          date: string
+          duration: number
+          email: string
+          games: string[]
+          id: string
+          name: string
+          payment_method: string | null
+          payment_status: string | null
+          phone: string | null
+          played_status: boolean | null
+          players: number
+          time: string
+          total_price: number
+          user_id: string | null
+        }
+        Insert: {
+          cabin: number
+          created_at?: string
+          date: string
+          duration: number
+          email: string
+          games?: string[]
+          id?: string
+          name: string
+          payment_method?: string | null
+          payment_status?: string | null
+          phone?: string | null
+          played_status?: boolean | null
+          players: number
+          time: string
+          total_price?: number
+          user_id?: string | null
+        }
+        Update: {
+          cabin?: number
+          created_at?: string
+          date?: string
+          duration?: number
+          email?: string
+          games?: string[]
+          id?: string
+          name?: string
+          payment_method?: string | null
+          payment_status?: string | null
+          phone?: string | null
+          played_status?: boolean | null
+          players?: number
+          time?: string
+          total_price?: number
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
