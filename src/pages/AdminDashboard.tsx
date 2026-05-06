@@ -160,6 +160,76 @@ const AdminDashboard = () => {
     };
   }, [isAdmin]);
 
+  // Fetch blocked slots for currently selected date + realtime updates
+  useEffect(() => {
+    if (!isAdmin) return;
+    let mounted = true;
+    const fetchBlocked = async () => {
+      const { data, error } = await supabase
+        .from("blocked_slots")
+        .select("*")
+        .eq("date", selectedDateISO);
+      if (!mounted) return;
+      if (error) {
+        console.error("blocked_slots fetch error:", error);
+        return;
+      }
+      setBlockedSlots((data || []) as any);
+    };
+    fetchBlocked();
+
+    const channel = supabase
+      .channel(`blocked-slots-${selectedDateISO}`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "blocked_slots", filter: `date=eq.${selectedDateISO}` },
+        () => fetchBlocked()
+      )
+      .subscribe();
+
+    return () => {
+      mounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, selectedDateISO]);
+
+  const isSlotBlocked = (time: string) =>
+    blockedSlots.some((s) => s.time === time);
+
+  const isSlotBooked = (time: string) =>
+    bookingsForSelected.some((b) => b.time === time);
+
+  const toggleBlockSlot = async (time: string) => {
+    if (blockingSlot) return;
+    setBlockingSlot(time);
+    const existing = blockedSlots.find((s) => s.time === time);
+    try {
+      if (existing) {
+        const { error } = await supabase
+          .from("blocked_slots")
+          .delete()
+          .eq("id", existing.id);
+        if (error) throw error;
+        setBlockedSlots((prev) => prev.filter((s) => s.id !== existing.id));
+        toast.success(`Unblocked ${time}`);
+      } else {
+        const { data, error } = await supabase
+          .from("blocked_slots")
+          .insert({ date: selectedDateISO, time })
+          .select()
+          .single();
+        if (error) throw error;
+        if (data) setBlockedSlots((prev) => [...prev, data as any]);
+        toast.success(`Blocked ${time}`);
+      }
+    } catch (err: any) {
+      console.error("Block toggle failed:", err);
+      toast.error(err?.message || "Failed to update slot");
+    } finally {
+      setBlockingSlot(null);
+    }
+  };
+
   const togglePlayed = async (b: Booking) => {
     const next = !b.played_status;
     // Optimistic update
