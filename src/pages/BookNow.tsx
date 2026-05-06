@@ -288,14 +288,16 @@ const BookNow = () => {
     return h;
   };
 
-  // Filter time slots: today requires at least 2-hour gap from now
+  // Filter time slots: today requires at least 2-hour gap from now;
+  // also remove admin-blocked and already-booked slots
   const availableTimes = (() => {
-    if (!date) return TIMES;
-    if (date !== today) return TIMES;
-    const now = new Date();
-    // minutes since midnight + 120-min lead time
-    const thresholdMinutes = now.getHours() * 60 + now.getMinutes() + 120;
-    return TIMES.filter((t) => parseSlotHour(t) * 60 >= thresholdMinutes);
+    let base = TIMES;
+    if (date === today) {
+      const now = new Date();
+      const thresholdMinutes = now.getHours() * 60 + now.getMinutes() + 120;
+      base = base.filter((t) => parseSlotHour(t) * 60 >= thresholdMinutes);
+    }
+    return base.filter((t) => !blockedTimes.includes(t) && !bookedTimes.includes(t));
   })();
 
   // Auto-clear time if it becomes invalid after date change
