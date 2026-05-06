@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ShieldX, Loader2, Check, CalendarDays, Clock, Users, Layers, Gamepad2, Phone, Timer, IndianRupee } from "lucide-react";
+import { ShieldX, Loader2, Check, CalendarDays, Clock, Users, Layers, Gamepad2, Phone, Timer, IndianRupee, Lock, Unlock } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import ScrollReveal from "@/components/ScrollReveal";
