@@ -172,6 +172,19 @@ const BookNow = () => {
 
   const handleConfirmBooking = async () => {
     if (!user) return;
+
+    // Final conflict check before insert
+    const { data: blockedCheck } = await supabase
+      .from("blocked_slots")
+      .select("id")
+      .eq("date", date)
+      .eq("time", time)
+      .maybeSingle();
+    if (blockedCheck) {
+      toast.error("This time slot is not available");
+      return;
+    }
+
     setSaving(true);
     try {
       const playersNum = playerType === "vr" ? 1 : isCarWheelSelected ? (playerType === "carwheel1" ? 1 : 2) : playerType!;
