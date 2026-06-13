@@ -570,28 +570,22 @@ const BookNow = () => {
                   <span className="font-display text-lg text-primary">Total</span>
                   <span className="font-display text-3xl font-bold text-brand-orange">₹{price}</span>
                 </div>
-                {PAYMENT_MODE === "PAY_ON_DESK" && (
-                  <div className="flex justify-end">
-                    <span className="text-xs font-display tracking-wider text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
-                      Payment: Pay at Desk
-                    </span>
-                  </div>
-                )}
+                <div className="flex justify-end">
+                  <span className="text-xs font-display tracking-wider text-brand-orange bg-brand-orange/10 border border-brand-orange/30 px-3 py-1 rounded-full">
+                    Secure online payment via Cashfree
+                  </span>
+                </div>
               </div>
             </div>
             <div className="text-center mt-8">
               <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                 onClick={handleConfirmBooking} disabled={saving}
                 className="btn-premium text-lg animate-pulse-glow disabled:opacity-50">
-                {saving
-                  ? (PAYMENT_MODE === "PAY_ON_DESK" ? "Confirming..." : "Processing Payment...")
-                  : (PAYMENT_MODE === "PAY_ON_DESK" ? `Confirm Booking — ₹${price}` : `Pay Now — ₹${price}`)}
+                {saving ? "Processing Payment..." : `Pay Online — ₹${price}`}
               </motion.button>
-              {PAYMENT_MODE === "PAY_ON_DESK" && (
-                <p className="text-xs text-muted-foreground mt-3">
-                  No online payment required. Pay at the desk on arrival.
-                </p>
-              )}
+              <p className="text-xs text-muted-foreground mt-3">
+                Your booking will be confirmed only after a successful payment.
+              </p>
             </div>
           </div>
         );
