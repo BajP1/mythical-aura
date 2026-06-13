@@ -3,6 +3,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// LIVE Cashfree endpoints
+const CASHFREE_API = "https://api.cashfree.com/pg/orders";
+const CASHFREE_CHECKOUT_BASE = "https://payments.cashfree.com/order/#";
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -32,8 +36,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const orderId = `TEST_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
+    const orderId = `MGS_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
     const origin = req.headers.get("origin") || "https://mythicalgamingstation.lovable.app";
     const returnUrl = `${origin}/payment-status?order_id=${orderId}`;
 
@@ -47,12 +50,10 @@ Deno.serve(async (req) => {
         customer_email: customerEmail,
         customer_phone: customerPhone,
       },
-      order_meta: {
-        return_url: returnUrl,
-      },
+      order_meta: { return_url: returnUrl },
     };
 
-    const response = await fetch("https://sandbox.cashfree.com/pg/orders", {
+    const response = await fetch(CASHFREE_API, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -73,11 +74,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log("Cashfree full response:", JSON.stringify(data));
-
-    // Construct payment_link from session_id if Cashfree doesn't return one
-    const paymentLink = data.payment_link || 
-      (data.payment_session_id ? `https://sandbox.cashfree.com/pg/orders/sessions/${data.payment_session_id}` : null);
+    const paymentLink = data.payment_link ||
+      (data.payment_session_id ? `${CASHFREE_CHECKOUT_BASE}${data.payment_session_id}` : null);
 
     return new Response(
       JSON.stringify({
