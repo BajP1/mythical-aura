@@ -74,7 +74,7 @@ const PaymentStatus = () => {
 
         // Guard against duplicates by Cashfree order id
         if (pending.cashfree_order_id) {
-          const { data: existing } = await supabase
+          const { data: existing } = await (supabase as any)
             .from("bookings")
             .select("id")
             .eq("cashfree_order_id", pending.cashfree_order_id)
