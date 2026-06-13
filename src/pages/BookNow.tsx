@@ -8,25 +8,13 @@ import ScrollReveal from "@/components/ScrollReveal";
 import { type PlayerType, getSectionsForPlayerType, getOptionForSection, getGamesForSelection, getPriceAndDuration, isCarWheel } from "@/data/bookingData";
 
 /* ============================================================
- * PAYMENT MODE SWITCH
- * Change this single constant to flip between gateways later.
- * Supported: "PAY_ON_DESK" | "CASHFREE" | "RAZORPAY"
+ * PAYMENT MODE — Cashfree LIVE
  * ============================================================ */
-type PaymentMode = "PAY_ON_DESK" | "CASHFREE" | "RAZORPAY";
-const PAYMENT_MODE: PaymentMode = "PAY_ON_DESK";
+const SUPABASE_FN_URL = "https://czjrlnpckeeejakcumkb.supabase.co/functions/v1";
+const SUPABASE_FN_ANON =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA";
 
-// Placeholder for future Razorpay integration
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const initRazorpayPayment = async (_orderData: {
-  amount: number;
-  customer_phone: string;
-  customer_name: string;
-  customer_email: string;
-  booking_id: string;
-}) => {
-  // TODO: Implement Razorpay checkout flow here in the future.
-  throw new Error("Razorpay integration is not implemented yet.");
-};
+export const PENDING_BOOKING_KEY = "mgs_pending_booking_v1";
 
 const STEPS = [
   { icon: Users, label: "Players" },
