@@ -454,6 +454,28 @@ const AdminDashboard = () => {
                         {b.played_status ? "Played" : "Not Played"}
                       </span>
                     </div>
+                    <div className="flex justify-between pt-1">
+                      <span className="text-muted-foreground text-xs">Payment</span>
+                      {(() => {
+                        const ps = (b.payment_status || "pending").toLowerCase();
+                        const isPaid = ps === "paid";
+                        const isFailed = ps === "failed";
+                        const cls = isPaid
+                          ? "bg-green-500/10 text-green-400 border-green-500/30"
+                          : isFailed
+                          ? "bg-red-500/10 text-red-400 border-red-500/30"
+                          : "bg-amber-500/10 text-amber-400 border-amber-500/30";
+                        const dot = isPaid ? "🟢" : isFailed ? "🔴" : "🟡";
+                        return (
+                          <span
+                            className={`text-xs px-2 py-0.5 rounded-md font-display tracking-wider border ${cls}`}
+                            title={b.payment_id || b.cashfree_order_id || ""}
+                          >
+                            {dot} {isPaid ? "Paid" : isFailed ? "Failed" : "Pending"}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </motion.div>
               ))}
