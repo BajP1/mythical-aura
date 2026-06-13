@@ -194,11 +194,22 @@ const History = () => {
                     >
                       {b.played_status ? "Played" : "Not Played"}
                     </span>
-                    {b.payment_status && (
-                      <span className="text-[10px] glass px-2 py-0.5 rounded-md uppercase tracking-wider text-brand-orange border border-brand-orange/30">
-                        {b.payment_status}
-                      </span>
-                    )}
+                    {(() => {
+                      const ps = (b.payment_status || "pending").toLowerCase();
+                      const isPaid = ps === "paid";
+                      const isFailed = ps === "failed";
+                      const cls = isPaid
+                        ? "bg-green-500/10 text-green-400 border-green-500/30"
+                        : isFailed
+                        ? "bg-red-500/10 text-red-400 border-red-500/30"
+                        : "bg-amber-500/10 text-amber-400 border-amber-500/30";
+                      const dot = isPaid ? "🟢" : isFailed ? "🔴" : "🟡";
+                      return (
+                        <span className={`text-[10px] px-2 py-0.5 rounded-md uppercase tracking-wider font-display border ${cls}`}>
+                          {dot} {isPaid ? "Paid" : isFailed ? "Failed" : "Pending"}
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
 
