@@ -161,15 +161,17 @@ const BookNow = () => {
   const handleConfirmBooking = async () => {
     if (!user) return;
 
-    // Final conflict check before insert
-    const { data: blockedCheck } = await supabase
-      .from("blocked_slots")
-      .select("id")
-      .eq("date", date)
-      .eq("time", time)
-      .maybeSingle();
+    // Final conflict check before creating the order
+    const [{ data: blockedCheck }, { data: bookedCheck }] = await Promise.all([
+      supabase.from("blocked_slots").select("id").eq("date", date).eq("time", time).maybeSingle(),
+      supabase.from("bookings").select("id").eq("date", date).eq("time", time).eq("cabin", sectionId!).maybeSingle(),
+    ]);
     if (blockedCheck) {
       toast.error("This time slot is not available");
+      return;
+    }
+    if (bookedCheck) {
+      toast.error("This section is already booked for this slot");
       return;
     }
 
@@ -177,12 +179,9 @@ const BookNow = () => {
     try {
       const playersNum = playerType === "vr" ? 1 : isCarWheelSelected ? (playerType === "carwheel1" ? 1 : 2) : playerType!;
 
-      // Determine payment metadata based on current mode
-      const paymentMethod =
-        PAYMENT_MODE === "PAY_ON_DESK" ? "pay_on_desk" :
-        PAYMENT_MODE === "CASHFREE" ? "cashfree" : "razorpay";
-
-      const bookingPayload: Record<string, any> = {
+      // Build the booking payload — DO NOT insert yet.
+      // The booking is only created after Cashfree confirms a successful payment.
+      const pendingPayload = {
         user_id: user.id,
         name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Guest",
         email: user.email || "",
@@ -194,69 +193,50 @@ const BookNow = () => {
         duration: totalDuration,
         phone,
         total_price: price,
-        payment_status: "pending",
-        payment_method: paymentMethod,
+        payment_method: "cashfree",
       };
 
-      const { data: bookingData, error: bookingError } = await supabase
-        .from("bookings")
-        .insert(bookingPayload as any)
-        .select("id")
-        .single();
-
-      if (bookingError) throw bookingError;
-      const createdId: string | null = bookingData?.id ?? null;
-
-      // ============================================================
-      // PAYMENT MODE BRANCHING
-      // ============================================================
-      if (PAYMENT_MODE === "PAY_ON_DESK") {
-        toast.success("Booking Confirmed — Pay at Desk");
-        setBookingId(createdId);
-        return;
-      }
-
-      if (PAYMENT_MODE === "CASHFREE") {
-        // Existing Cashfree flow — preserved for future re-enable.
-        const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anJsbnBja2VlZWpha2N1bWtiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNTU3NzIsImV4cCI6MjA5MDYzMTc3Mn0.Crm8AMmEfCi-McOiX6PNwTU1qAmZ8TLYXRATZzHQmuA",
-          },
-          body: JSON.stringify({
-            amount: price,
-            customer_phone: phone,
-            customerName: user.user_metadata?.full_name || "Guest",
-            customerEmail: user.email || "guest@example.com",
-          }),
-        });
-        const data = await response.json();
-        console.log("Cashfree order response:", data);
-        if (!response.ok || data.error) {
-          const message = data?.error?.message || (typeof data?.error === "string" ? data.error : JSON.stringify(data.error));
-          throw new Error(message);
-        }
-        if (!data.payment_session_id) throw new Error("No payment_session_id returned from Cashfree");
-        window.location.href = `https://payments.cashfree.com/order/#${data.payment_session_id}`;
-        return;
-      }
-
-      if (PAYMENT_MODE === "RAZORPAY") {
-        await initRazorpayPayment({
+      // Create Cashfree order via secure edge function
+      const response = await fetch(`${SUPABASE_FN_URL}/create-cashfree-order`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${SUPABASE_FN_ANON}`,
+        },
+        body: JSON.stringify({
           amount: price,
           customer_phone: phone,
-          customer_name: user.user_metadata?.full_name || "Guest",
-          customer_email: user.email || "guest@example.com",
-          booking_id: createdId || "",
-        });
-        return;
+          customerName: pendingPayload.name,
+          customerEmail: pendingPayload.email || "guest@example.com",
+        }),
+      });
+      const data = await response.json();
+      console.log("Cashfree order response:", data);
+      if (!response.ok || data.error) {
+        const message =
+          data?.error?.message ||
+          (typeof data?.error === "string" ? data.error : "Unable to start payment");
+        throw new Error(message);
       }
+      if (!data.payment_session_id || !data.order_id) {
+        throw new Error("Invalid response from payment gateway");
+      }
+
+      // Persist the pending booking client-side so PaymentStatus can create
+      // the booking ONLY after successful Cashfree verification.
+      sessionStorage.setItem(
+        PENDING_BOOKING_KEY,
+        JSON.stringify({ ...pendingPayload, cashfree_order_id: data.order_id })
+      );
+
+      // Redirect to Cashfree checkout
+      window.location.href =
+        data.payment_link || `https://payments.cashfree.com/order/#${data.payment_session_id}`;
+      return;
     } catch (err: any) {
-      console.error("Booking error:", err);
-      const message = err?.message || (typeof err === "string" ? err : JSON.stringify(err));
+      console.error("Payment error:", err);
       toast.dismiss();
-      toast.error(message);
+      toast.error(err?.message || "Payment could not be started");
     } finally {
       setSaving(false);
     }
