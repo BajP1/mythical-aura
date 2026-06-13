@@ -24,6 +24,10 @@ interface Booking {
   phone: string;
   total_price: number;
   played_status?: boolean | null;
+  payment_status?: string | null;
+  payment_method?: string | null;
+  payment_id?: string | null;
+  cashfree_order_id?: string | null;
   created_at: string;
 }
 
