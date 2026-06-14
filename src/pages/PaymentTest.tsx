@@ -30,11 +30,19 @@ const PaymentTest = () => {
         throw new Error(data.error || "Failed to create order");
       }
 
-      if (data?.payment_link) {
-        window.location.href = data.payment_link;
-      } else {
-        throw new Error("Payment link missing from gateway response");
+      if (!data?.payment_session_id) {
+        throw new Error("payment_session_id missing from gateway response");
       }
+
+      const CashfreeCtor = (window as any).Cashfree;
+      if (typeof CashfreeCtor !== "function") {
+        throw new Error("Cashfree SDK failed to load. Please refresh and try again.");
+      }
+      const cashfree = CashfreeCtor({ mode: "production" });
+      await cashfree.checkout({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self",
+      });
     } catch (err: any) {
       console.error("Payment error:", err);
       toast.error(err.message || "Failed to initiate payment");
