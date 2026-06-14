@@ -197,7 +197,7 @@ const BookNow = () => {
       };
 
       // Create Cashfree order via secure edge function
-      const response = await fetch(`${SUPABASE_FN_URL}/create-cashfree-order`, {
+      const response = await fetch(`${SUPABASE_FN_URL}/create-order`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

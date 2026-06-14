@@ -11,7 +11,7 @@ const PaymentTest = () => {
   const handlePay = async () => {
     setLoading(true);
     try {
-      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-cashfree-order", {
+      const response = await fetch("https://czjrlnpckeeejakcumkb.supabase.co/functions/v1/create-order", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
