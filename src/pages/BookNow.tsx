@@ -211,7 +211,7 @@ const BookNow = () => {
         }),
       });
       const data = await response.json();
-      console.log("Cashfree order response:", data);
+      console.log("[Cashfree] create-order response:", data);
       if (!response.ok || data.error) {
         const message =
           data?.error?.message ||
@@ -229,9 +229,17 @@ const BookNow = () => {
         JSON.stringify({ ...pendingPayload, cashfree_order_id: data.order_id })
       );
 
-      // Redirect to Cashfree checkout
-      window.location.href =
-        data.payment_link || `https://payments.cashfree.com/order/#${data.payment_session_id}`;
+      // Launch Cashfree v3 SDK checkout (hosted URL pattern is deprecated)
+      const CashfreeCtor = (window as any).Cashfree;
+      if (typeof CashfreeCtor !== "function") {
+        throw new Error("Cashfree SDK failed to load. Please refresh and try again.");
+      }
+      const cashfree = CashfreeCtor({ mode: "production" });
+      console.log("[Cashfree] launching checkout with session id:", data.payment_session_id);
+      await cashfree.checkout({
+        paymentSessionId: data.payment_session_id,
+        redirectTarget: "_self",
+      });
       return;
     } catch (err: any) {
       console.error("Payment error:", err);
