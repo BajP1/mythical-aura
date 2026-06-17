@@ -18,6 +18,7 @@ const PaymentStatus = () => {
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [bookingDetails, setBookingDetails] = useState<any>(null);
   const ranRef = useRef(false);
 
   useEffect(() => {
