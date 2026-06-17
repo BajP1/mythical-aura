@@ -72,6 +72,7 @@ const PaymentStatus = () => {
           return;
         }
         const pending = JSON.parse(raw);
+        setBookingDetails(pending);
 
         // Guard against duplicates by Cashfree order id
         if (pending.cashfree_order_id) {
