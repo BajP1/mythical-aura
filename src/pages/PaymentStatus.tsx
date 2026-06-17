@@ -18,6 +18,7 @@ const PaymentStatus = () => {
   const [status, setStatus] = useState<Status>("loading");
   const [errorMsg, setErrorMsg] = useState<string>("");
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [bookingDetails, setBookingDetails] = useState<any>(null);
   const ranRef = useRef(false);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ const PaymentStatus = () => {
           return;
         }
         const pending = JSON.parse(raw);
+        setBookingDetails(pending);
 
         // Guard against duplicates by Cashfree order id
         if (pending.cashfree_order_id) {
@@ -180,8 +182,35 @@ const PaymentStatus = () => {
           {status === "success" && (
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
               <CheckCircle size={64} className="mx-auto mb-6 text-green-500" />
-              <h1 className="heading-xl mb-4">Payment Successful ✅</h1>
-              <p className="subtitle mb-6">Your booking has been confirmed!</p>
+              <h1 className="heading-xl mb-2">Payment Successful ✅</h1>
+              <p className="subtitle mb-2">Booking Confirmed 🎉</p>
+              <p className="text-green-500 font-semibold mb-6">Payment Status: PAID</p>
+
+              {bookingDetails && (
+                <div className="card-premium p-6 mb-4 text-left">
+                  <p className="text-muted-foreground text-sm mb-3 text-center font-semibold uppercase tracking-wider">
+                    Booking Details
+                  </p>
+                  <div className="space-y-2 text-sm">
+                    {bookingDetails.cabin && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Section:</span><span className="font-semibold">{bookingDetails.cabin}</span></div>
+                    )}
+                    {bookingDetails.date && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Date:</span><span className="font-semibold">{bookingDetails.date}</span></div>
+                    )}
+                    {bookingDetails.time && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Time:</span><span className="font-semibold">{bookingDetails.time}</span></div>
+                    )}
+                    {bookingDetails.duration && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Duration:</span><span className="font-semibold">{bookingDetails.duration}</span></div>
+                    )}
+                    {bookingDetails.amount && (
+                      <div className="flex justify-between"><span className="text-muted-foreground">Amount:</span><span className="font-semibold">₹{bookingDetails.amount}</span></div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {bookingId && (
                 <div className="card-premium p-6 mb-4">
                   <p className="text-muted-foreground text-sm mb-1">Entry Number</p>
@@ -198,9 +227,14 @@ const PaymentStatus = () => {
                   </p>
                 </div>
               )}
-              <Link to="/" className="btn-premium inline-flex items-center gap-2 text-lg">
-                Back to Home
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Link to="/history" className="btn-premium inline-flex items-center justify-center gap-2 text-lg">
+                  View My Bookings
+                </Link>
+                <Link to="/" className="btn-secondary inline-flex items-center justify-center gap-2 text-lg">
+                  Back to Home
+                </Link>
+              </div>
             </motion.div>
           )}
 
