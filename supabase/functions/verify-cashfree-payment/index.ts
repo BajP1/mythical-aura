@@ -24,6 +24,8 @@ Deno.serve(async (req) => {
     }
     const appId = Deno.env.get("CASHFREE_CLIENT_ID");
     const secretKey = Deno.env.get("CASHFREE_CLIENT_SECRET");
+    console.log("CLIENT_ID EXISTS:", !!appId);
+    console.log("CLIENT_SECRET EXISTS:", !!secretKey);
     if (!appId || !secretKey) {
       return new Response(
         JSON.stringify({ error: "Cashfree credentials not configured" }),
