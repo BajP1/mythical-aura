@@ -22,8 +22,8 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-    const appId = Deno.env.get("CASHFREE_CLIENT_ID");
-    const secretKey = Deno.env.get("CASHFREE_CLIENT_SECRET");
+    const appId = "PASTE_YOUR_REAL_CASHFREE_CLIENT_ID_HERE";
+    const secretKey = "PASTE_YOUR_REAL_CASHFREE_CLIENT_SECRET_HERE";
     console.log("CLIENT_ID EXISTS:", !!appId);
     console.log("CLIENT_SECRET EXISTS:", !!secretKey);
     if (!appId || !secretKey) {
