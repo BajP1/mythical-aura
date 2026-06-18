@@ -26,6 +26,9 @@ const PaymentStatus = () => {
     ranRef.current = true;
 
     const run = async () => {
+      console.log("[PaymentStatus] window.location.href:", window.location.href);
+      console.log("[PaymentStatus] order_id from URL:", orderId);
+
       if (!orderId) {
         setStatus("failed");
         setErrorMsg("Missing order id");
@@ -34,6 +37,7 @@ const PaymentStatus = () => {
 
       try {
         // 1. Verify payment server-side
+        console.log("[PaymentStatus] -> POST verify-cashfree-payment", { order_id: orderId });
         const res = await fetch(`${SUPABASE_FN_URL}/verify-cashfree-payment`, {
           method: "POST",
           headers: {
@@ -43,7 +47,9 @@ const PaymentStatus = () => {
           body: JSON.stringify({ order_id: orderId }),
         });
         const data = await res.json();
-        console.log("Verify response:", data);
+        console.log("[PaymentStatus] verify HTTP status:", res.status);
+        console.log("[PaymentStatus] verify response JSON:", data);
+        console.log("[PaymentStatus] data.status =", data?.status);
 
         if (!res.ok) {
           setStatus("failed");
@@ -59,15 +65,14 @@ const PaymentStatus = () => {
         if (data.status !== "PAID") {
           setStatus("failed");
           setErrorMsg("Payment was not successful");
-          // Clean up any pending booking — slot must NOT be blocked
           sessionStorage.removeItem(PENDING_BOOKING_KEY);
           return;
         }
 
         // 2. Payment verified PAID → create booking now (idempotent)
         const raw = sessionStorage.getItem(PENDING_BOOKING_KEY);
+        console.log("[PaymentStatus] pending booking in sessionStorage:", raw);
         if (!raw) {
-          // Already created on a previous visit, just succeed
           setStatus("success");
           return;
         }
@@ -76,11 +81,12 @@ const PaymentStatus = () => {
 
         // Guard against duplicates by Cashfree order id
         if (pending.cashfree_order_id) {
-          const { data: existing } = await (supabase as any)
+          const { data: existing, error: dupErr } = await (supabase as any)
             .from("bookings")
             .select("id")
             .eq("cashfree_order_id", pending.cashfree_order_id)
             .maybeSingle();
+          console.log("[PaymentStatus] dedupe lookup:", { existing, dupErr });
           if (existing?.id) {
             setBookingId(existing.id);
             setStatus("success");
@@ -118,6 +124,7 @@ const PaymentStatus = () => {
           payment_status: "paid",
           payment_id: data.payment_id || null,
         };
+        console.log("[PaymentStatus] booking insert payload:", insertPayload);
 
         const { data: inserted, error: insertErr } = await supabase
           .from("bookings")
@@ -125,8 +132,10 @@ const PaymentStatus = () => {
           .select("id")
           .single();
 
+        console.log("[PaymentStatus] booking insert result:", { inserted, insertErr });
+
         if (insertErr) {
-          console.error("Booking insert failed:", insertErr);
+          console.error("[PaymentStatus] Booking insert FAILED:", insertErr);
           setStatus("failed");
           setErrorMsg(insertErr.message);
           return;
@@ -136,7 +145,7 @@ const PaymentStatus = () => {
         setBookingId(inserted?.id || null);
         setStatus("success");
       } catch (err: any) {
-        console.error(err);
+        console.error("[PaymentStatus] Unexpected error:", err);
         setStatus("failed");
         setErrorMsg(err?.message || "Unexpected error");
       }
