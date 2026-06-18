@@ -22,9 +22,8 @@ Deno.serve(async (req) => {
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
-
-    const appId = Deno.env.get("CASHFREE_APP_ID");
-    const secretKey = Deno.env.get("CASHFREE_SECRET_KEY");
+    const appId = Deno.env.get("CASHFREE_CLIENT_ID");
+    const secretKey = Deno.env.get("CASHFREE_CLIENT_SECRET");
     if (!appId || !secretKey) {
       return new Response(
         JSON.stringify({ error: "Cashfree credentials not configured" }),
